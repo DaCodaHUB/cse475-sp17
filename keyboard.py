@@ -64,16 +64,14 @@ class VirtualKeyboard():
         # main event loop (hog all processes since we're on top, but someone might want
         # to rewrite this to be more event based...
         while True:
-            time.sleep(0.05)  # 10/second is often enough
+            time.sleep(0.02)  # 10/second is often enough
             events = pygame.event.get()
             if events is not None:
                 for e in events:
-                    if (e.type == KEYDOWN):
+                    if (e.type == KEYDOWN and e.key > 0):
                         if e.key == K_ESCAPE:
-                            self.clear()
                             return self.text  # Return what we started with
                         elif e.key == K_RETURN:
-                            self.clear()
                             return self.input.text  # Return what the user entered
                         elif e.key == K_LEFT:
                             self.input.deccursor()
@@ -90,37 +88,29 @@ class VirtualKeyboard():
                         elif e.key == K_RSHIFT or e.key == K_LSHIFT:
                             self.shifted = True
                             self.togglecaps()
-                            for key in self.keys:
-                                if key.caption == "Shift":
-                                    key.selected = True
-                                    key.dirty = True
-                                    break
+                            self.selectkey("shift")
                             self.paintkeys()
                         elif e.key == K_CAPSLOCK:
                             self.caps = True
                             self.togglecaps()
                             self.paintkeys()
+                        else:
+                            charac = chr(e.key)
+                            self.selectkey(charac)
+                            self.input.addcharatcursor(charac)
+                            self.paintkeys()
+                            #print "pressed key {}".format(e.key)
 
-
-                        # ADD EVENTS FOR ALL KEY PRESSES
-                        #elif e.key >= 48 and e.key <= 57:
-                            #number
-                        #elif e.key >
-
-                        #self.input.addcharatcursor(chr(e.key))
-
-                    elif (e.type == KEYUP):
+                    elif (e.type == KEYUP and e.key > 0):
                         if (e.key == K_RSHIFT or e.key == K_LSHIFT):
                             self.shifted = False
                             self.togglecaps()
-                            self.unselectall()
-                            self.paintkeys()
                         elif e.key == K_CAPSLOCK:
                             self.caps = False
                             self.togglecaps()
-                            self.unselectall()
-                            self.paintkeys()
-
+                        #print "unpressed key {}".format(e.key)
+                        self.unselectall()
+                        self.paintkeys()
                     elif (e.type == MOUSEBUTTONDOWN):
                         self.selectatmouse()
                     elif (e.type == MOUSEBUTTONUP):
@@ -135,6 +125,13 @@ class VirtualKeyboard():
                     elif (e.type == pygame.QUIT):
                         return self.text  # Return what we started with
 
+    def selectkey(self, caption):
+        for key in self.keys:
+            if key.caption.lower() == caption:
+                key.selected = True
+                key.dirty = True
+                return True
+        return False
 
     def unselectall(self, force=False):
         ''' Force all the keys to be unselected
@@ -163,7 +160,7 @@ class VirtualKeyboard():
                 if key.shiftkey:
                     key.selected = True;
                     key.dirty = True;
-                    #self.caps = True
+                    self.caps = ~self.caps
                     self.togglecaps()
                     self.paintkeys()
                     return False
@@ -347,9 +344,7 @@ class VKey(object): # A single key for the VirtualKeyboard
         screen.blit(templayer, (self.x, self.y))
         self.dirty = False
 
-class TextInput():
-    ''' Handles the text input box and manages the cursor '''
-
+class TextInput(): # Handles the text input box and manages the cursor
     def __init__(self, screen, text, x, y, w, h):
         self.screen = screen
         self.text = text
