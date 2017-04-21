@@ -4,6 +4,8 @@ import pygame, time, os
 from pygame.locals import *
 from string import maketrans
 from win32api import GetSystemMetrics
+from win32api import GetKeyState
+from win32con import VK_CAPITAL
 
 WINDOWSIZE = .75
 
@@ -44,7 +46,8 @@ class VirtualKeyboard():
         self.textW = self.keyW * 12
         self.textH = self.keyH * 2 - 6
 
-        self.caps = False
+        self.caps = bool(GetKeyState(VK_CAPITAL)) # 0 = no caps lock, 1 = caps lock on
+        self.shifted = False
         self.keys = []
         #        self.textbox = pygame.Surface((self.rect.width,self.keyH*2))
         self.addkeys()  # add all the keys
@@ -53,13 +56,11 @@ class VirtualKeyboard():
         pygame.display.update()
 
     def run(self, text=''):
-
         self.text = text
         # create an input text box
         # create a text input box with room for 2 lines of text. leave room for the escape key
         self.input = TextInput(self.screen, self.text, self.x, self.y, self.textW, self.textH)
 
-        counter = 0
         # main event loop (hog all processes since we're on top, but someone might want
         # to rewrite this to be more event based...
         while True:
@@ -87,9 +88,19 @@ class VirtualKeyboard():
                             self.input.addcharatcursor(' ')
                             self.paintkeys()
                         elif e.key == K_RSHIFT or e.key == K_LSHIFT:
+                            self.shifted = True
                             self.togglecaps()
-                            self.paintkeys() # Issue here the shift key stays white
-                        # add caps lock functionality
+                            for key in self.keys:
+                                if key.caption == "Shift":
+                                    key.selected = True
+                                    key.dirty = True
+                                    break
+                            self.paintkeys()
+                        elif e.key == K_CAPSLOCK:
+                            self.caps = True
+                            self.togglecaps()
+                            self.paintkeys()
+
 
                         # ADD EVENTS FOR ALL KEY PRESSES
                         #elif e.key >= 48 and e.key <= 57:
@@ -97,6 +108,18 @@ class VirtualKeyboard():
                         #elif e.key >
 
                         #self.input.addcharatcursor(chr(e.key))
+
+                    elif (e.type == KEYUP):
+                        if (e.key == K_RSHIFT or e.key == K_LSHIFT):
+                            self.shifted = False
+                            self.togglecaps()
+                            self.unselectall()
+                            self.paintkeys()
+                        elif e.key == K_CAPSLOCK:
+                            self.caps = False
+                            self.togglecaps()
+                            self.unselectall()
+                            self.paintkeys()
 
                     elif (e.type == MOUSEBUTTONDOWN):
                         self.selectatmouse()
@@ -112,11 +135,6 @@ class VirtualKeyboard():
                     elif (e.type == pygame.QUIT):
                         return self.text  # Return what we started with
 
-            counter += 1
-            if counter > 5:
-                self.input.flashcursor()
-                counter = 0
-            ##            gtk.main_iteration(block=False)
 
     def unselectall(self, force=False):
         ''' Force all the keys to be unselected
@@ -143,12 +161,12 @@ class VirtualKeyboard():
                     self.paintkeys()
                     return False
                 if key.shiftkey:
+                    key.selected = True;
+                    key.dirty = True;
+                    #self.caps = True
                     self.togglecaps()
                     self.paintkeys()
                     return False
-                if key.escape: # can add escape key if wanted
-                    self.input.text = ''  # clear input
-                    return True
                 if key.enter:
                     return True
                 if self.caps:
@@ -163,11 +181,6 @@ class VirtualKeyboard():
         return False
 
     def togglecaps(self):
-        ''' Toggle uppercase / lowercase '''
-        if self.caps:
-            self.caps = False
-        else:
-            self.caps = True
         for key in self.keys:
             key.dirty = True
 
@@ -191,7 +204,6 @@ class VirtualKeyboard():
         self.paintkeys()
 
     def addkeys(self):  # Add all the keys for the virtual keyboard 
-
         x = self.x
         y = self.y + self.textH + self.keyH / 4
 
@@ -260,7 +272,7 @@ class VirtualKeyboard():
     def paintkeys(self):
         ''' Draw the keyboard (but only if they're dirty.) '''
         for key in self.keys:
-            key.draw(self.screen, self.background, self.caps)
+            key.draw(self.screen, self.background, self.caps ^ self.shifted)
         pygame.display.update()
 
     def clear(self):
@@ -269,7 +281,71 @@ class VirtualKeyboard():
         pygame.display.update()
 
 
-# ----------------------------------------------------------------------------
+class VKey(object): # A single key for the VirtualKeyboard
+    def __init__(self, caption, x, y, w, h, font):
+        self.x = x
+        self.y = y
+        self.caption = caption
+        self.w = w + 1  # overlap borders
+        self.h = h + 1  # overlap borders
+        self.special = False
+        self.enter = False
+        self.bskey = False
+        self.spacekey = False
+        self.shiftkey = False
+        self.font = font
+        self.selected = False
+        self.dirty = True
+        self.keylayer = pygame.Surface((self.w, self.h)).convert()
+        self.keylayer.fill((128, 128, 128))  # 0,0,0
+        ##        self.keylayer.set_alpha(160)
+        # Pre draw the border and store in the key layer
+        pygame.draw.rect(self.keylayer, (255, 255, 255), (0, 0, self.w, self.h), 1)
+
+    def draw(self, screen, background, shifted=False, forcedraw=False):
+        '''  Draw one key if it needs redrawing '''
+        if not forcedraw:
+            if not self.dirty: return
+
+        keyletter = self.caption
+        if shifted:
+            #if self.shiftkey:
+            #    self.selected = True  # highlight the Shift button
+            if not self.special:
+                keyletter = self.caption.translate(Uppercase)
+
+        position = Rect(self.x, self.y, self.w, self.h)
+
+        # put the background back on the screen so we can shade properly
+        screen.blit(background, (self.x, self.y), position)
+
+        # Put the shaded key background into key layer
+        if self.selected:
+            color = (200, 200, 200)
+        else:
+            color = (0, 0, 0)
+
+        # Copy key layer onto the screen using Alpha so you can see through it
+        pygame.draw.rect(self.keylayer, color, (1, 1, self.w - 2, self.h - 2))
+        screen.blit(self.keylayer, (self.x, self.y))
+
+        # Create a new temporary layer for the key contents
+        # This might be sped up by pre-creating both selected and unselected layers when
+        # the key is created, but the speed seems fine unless you're drawing every key at once
+        templayer = pygame.Surface((self.w, self.h))
+        templayer.set_colorkey((0, 0, 0))
+
+        color = (255, 255, 255)
+        text = self.font.render(keyletter, 1, (255, 255, 255))
+        textpos = text.get_rect()
+        blockoffx = (self.w / 2)
+        blockoffy = (self.h / 2)
+        offsetx = blockoffx - (textpos.width / 2)
+        offsety = blockoffy - (textpos.height / 2)
+        templayer.blit(text, (offsetx, offsety))
+
+        screen.blit(templayer, (self.x, self.y))
+        self.dirty = False
 
 class TextInput():
     ''' Handles the text input box and manages the cursor '''
@@ -409,76 +485,6 @@ class TextInput():
 
 
 # ----------------------------------------------------------------------------
-
-class VKey(object):
-    ''' A single key for the VirtualKeyboard '''
-
-    #    def __init__(self, caption, x, y, w=67, h=67):
-    def __init__(self, caption, x, y, w, h, font):
-        self.x = x
-        self.y = y
-        self.caption = caption
-        self.w = w + 1  # overlap borders
-        self.h = h + 1  # overlap borders
-        self.special = False
-        self.enter = False
-        self.bskey = False
-        self.spacekey = False
-        self.escape = False
-        self.shiftkey = False
-        self.font = font
-        self.selected = False
-        self.dirty = True
-        self.keylayer = pygame.Surface((self.w, self.h)).convert()
-        self.keylayer.fill((128, 128, 128))  # 0,0,0
-        ##        self.keylayer.set_alpha(160)
-        # Pre draw the border and store in the key layer
-        pygame.draw.rect(self.keylayer, (255, 255, 255), (0, 0, self.w, self.h), 1)
-
-    def draw(self, screen, background, shifted=False, forcedraw=False):
-        '''  Draw one key if it needs redrawing '''
-        if not forcedraw:
-            if not self.dirty: return
-
-        keyletter = self.caption
-        if shifted:
-            if self.shiftkey:
-                self.selected = True  # highlight the Shift button
-            if not self.special:
-                keyletter = self.caption.translate(Uppercase)
-
-        position = Rect(self.x, self.y, self.w, self.h)
-
-        # put the background back on the screen so we can shade properly
-        screen.blit(background, (self.x, self.y), position)
-
-        # Put the shaded key background into key layer
-        if self.selected:
-            color = (200, 200, 200)
-        else:
-            color = (0, 0, 0)
-
-        # Copy key layer onto the screen using Alpha so you can see through it
-        pygame.draw.rect(self.keylayer, color, (1, 1, self.w - 2, self.h - 2))
-        screen.blit(self.keylayer, (self.x, self.y))
-
-        # Create a new temporary layer for the key contents
-        # This might be sped up by pre-creating both selected and unselected layers when
-        # the key is created, but the speed seems fine unless you're drawing every key at once
-        templayer = pygame.Surface((self.w, self.h))
-        templayer.set_colorkey((0, 0, 0))
-
-        color = (255, 255, 255)
-        text = self.font.render(keyletter, 1, (255, 255, 255))
-        textpos = text.get_rect()
-        blockoffx = (self.w / 2)
-        blockoffy = (self.h / 2)
-        offsetx = blockoffx - (textpos.width / 2)
-        offsety = blockoffy - (textpos.height / 2)
-        templayer.blit(text, (offsetx, offsety))
-
-        screen.blit(templayer, (self.x, self.y))
-        self.dirty = False
 
 
 def main():
