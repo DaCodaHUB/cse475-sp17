@@ -1,5 +1,7 @@
 # Adapted from: https://github.com/wbphelps/VKeyboard
 
+# TODO: add autoscroll to top textbox, add repeats when holding a key down
+
 import pygame, time, os
 from pygame.locals import *
 from string import maketrans
@@ -80,9 +82,11 @@ class VirtualKeyboard():
                             self.input.inccursor()
                             pygame.display.flip()
                         elif e.key == K_BACKSPACE:
+                            self.selectkey('<-')
                             self.input.backspace()
                             self.paintkeys()
                         elif e.key == K_SPACE:
+                            self.selectkey('space')
                             self.input.addcharatcursor(' ')
                             self.paintkeys()
                         elif e.key == K_RSHIFT or e.key == K_LSHIFT:
