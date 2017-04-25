@@ -5,9 +5,7 @@
 import pygame, time, os
 from pygame.locals import *
 from string import maketrans
-from win32api import GetSystemMetrics
-from win32api import GetKeyState
-from win32con import VK_CAPITAL
+from screeninfo import get_monitors
 
 WINDOWSIZE = .75
 
@@ -48,7 +46,8 @@ class VirtualKeyboard():
         self.textW = self.keyW * 12
         self.textH = self.keyH * 2 - 6
 
-        self.caps = bool(GetKeyState(VK_CAPITAL)) # 0 = no caps lock, 1 = caps lock on
+        # self.caps = bool(GetKeyState(VK_CAPITAL)) # 0 = no caps lock, 1 = caps lock on
+        self.caps = False
         self.shifted = False
         self.keys = []
         #        self.textbox = pygame.Surface((self.rect.width,self.keyH*2))
@@ -490,14 +489,15 @@ def main():
     pygame.init()
 
     # create window and center it
-    screen_width = GetSystemMetrics(0)
-    screen_height = GetSystemMetrics(1)
-    window_width = int(round(GetSystemMetrics(0) * WINDOWSIZE))
-    window_height = int(round(GetSystemMetrics(1) * WINDOWSIZE))
-    pos_x = screen_width / 2 - window_width / 2
-    pos_y = screen_height - window_height
-    os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (pos_x, pos_y)
-    os.environ['SDL_VIDEO_CENTERED'] = '0'
+    screen = get_monitors().pop()
+    screen_width = screen.width
+    screen_height = screen.height
+    window_width = int(round(screen_width * WINDOWSIZE))
+    window_height = int(round(screen_height * WINDOWSIZE))
+    # pos_x = screen_width / 2 - window_width / 2
+    # pos_y = screen_height - window_height
+    # os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (pos_x, pos_y)
+    # os.environ['SDL_VIDEO_CENTERED'] = '0'
 
     surf = pygame.display.set_mode([window_width, window_height])
     vkeybd = VirtualKeyboard(surf)
