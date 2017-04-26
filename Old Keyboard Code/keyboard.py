@@ -1,6 +1,6 @@
 # Adapted from: https://github.com/wbphelps/VKeyboard
 
-import pygame, time, os, sched
+import pygame, time, globals, os, sched
 from key import VKey
 from textinput import TextInput
 from pygame.locals import *
@@ -8,11 +8,13 @@ from screeninfo import get_monitors
 
 class VirtualKeyboard():
     def __init__(self, screen):
+
         self.screen = screen
         self.rect = self.screen.get_rect()
         self.w = self.rect.width
         self.h = self.rect.height
 
+        # make a copy of the screen
         self.screenCopy = screen.copy()
 
         # create a background surface
@@ -27,23 +29,29 @@ class VirtualKeyboard():
 
         self.x = (self.w - self.keyW * 12) / 2  # centered
         self.y = 5  # stay away from the edges (better touch)
+        #        print 'keys x {} w {} keyW {} keyH {}'.format(self.x, self.w, self.keyW, self.keyH)
 
         pygame.font.init()  # Just in case
         self.keyFont = pygame.font.Font(None, self.keyW)  # keyboard font
 
         # set dimensions for text input box
+        #self.textW = self.w-(self.keyW+2) # leave room for escape key (?)
         self.textW = self.keyW * 12
         self.textH = self.keyH * 2 - 6
 
+        # self.caps = bool(GetKeyState(VK_CAPITAL)) # 0 = no caps lock, 1 = caps lock on
         self.caps = False
         self.shifted = False
         self.keys = []
+        #        self.textbox = pygame.Surface((self.rect.width,self.keyH*2))
         self.addkeys()  # add all the keys
         self.paintkeys()  # paint all the keys
+
         pygame.display.update()
 
     def run(self, text=''):
         self.text = text
+        # create an input text box
         # create a text input box with room for 2 lines of text. leave room for the escape key
         self.input = TextInput(self.screen, self.text, self.x, self.y, self.textW, self.textH)
 
@@ -55,10 +63,10 @@ class VirtualKeyboard():
             if events is not None:
                 for e in events:
                     if (e.type == KEYDOWN and e.key > 0):
-                        if e.key == K_RETURN:
-                            #return self.input.text  # Return what the user entered
-                            print "return"
-                            # TODO: Add newline here
+                        if e.key == K_ESCAPE:
+                            return self.text  # Return what we started with
+                        elif e.key == K_RETURN:
+                            return self.input.text  # Return what the user entered
                         elif e.key == K_LEFT:
                             self.input.deccursor()
                             pygame.display.flip()
@@ -87,6 +95,7 @@ class VirtualKeyboard():
                             self.selectkey(charac)
                             self.input.addcharatcursor(charac)
                             self.paintkeys()
+                            #print "pressed key {}".format(e.key)
 
                     elif (e.type == KEYUP and e.key > 0):
                         if (e.key == K_RSHIFT or e.key == K_LSHIFT):
@@ -95,8 +104,20 @@ class VirtualKeyboard():
                         elif e.key == K_CAPSLOCK:
                             self.caps = False
                             self.togglecaps()
+                        #print "unpressed key {}".format(e.key)
                         self.unselectall()
                         self.paintkeys()
+                    elif (e.type == MOUSEBUTTONDOWN):
+                        self.selectatmouse()
+                    elif (e.type == MOUSEBUTTONUP):
+                        if self.clickatmouse():
+                            # user clicked enter or escape if returns True
+                            self.clear()
+                            return self.input.text  # Return what the user entered
+                    elif (e.type == MOUSEMOTION):
+                        if e.buttons[0] == 1:
+                            # user click-dragged to a different key?
+                            self.selectatmouse()
                     elif (e.type == pygame.QUIT):
                         return self.text  # Return what we started with
 
@@ -108,17 +129,74 @@ class VirtualKeyboard():
                 return True
         return False
 
-    def unselectall(self, force=False): #Force all the keys to be unselected. Marks any that change as dirty to redraw
+    def unselectall(self, force=False):
+        ''' Force all the keys to be unselected
+            Marks any that change as dirty to redraw '''
         for key in self.keys:
             if key.selected:
                 key.selected = False
                 key.dirty = True
 
+    def clickatmouse(self):
+        ''' Check to see if the user is pressing down on a key and draw it selected '''
+        self.unselectall()
+        for key in self.keys:
+            keyrect = Rect(key.x, key.y, key.w, key.h)
+            if keyrect.collidepoint(pygame.mouse.get_pos()):
+                key.dirty = True
+                if key.bskey:
+                    # Backspace
+                    self.input.backspace()
+                    self.paintkeys()
+                    return False
+                if key.spacekey:
+                    self.input.addcharatcursor(' ')
+                    self.paintkeys()
+                    return False
+                if key.shiftkey:
+                    key.selected = True;
+                    key.dirty = True;
+                    self.caps = ~self.caps
+                    self.togglecaps()
+                    self.paintkeys()
+                    return False
+                if key.enter:
+                    return True
+                if self.caps:
+                    keycap = key.caption.translate(Uppercase)
+                else:
+                    keycap = key.caption
+                self.input.addcharatcursor(keycap)
+                self.paintkeys()
+                return False
+
+        self.paintkeys()
+        return False
+
     def togglecaps(self):
         for key in self.keys:
             key.dirty = True
 
-    def addkeys(self):  # Add all the keys for the virtual keyboard
+    def selectatmouse(self):
+        # User has touched the screen - is it inside the textbox, or inside a key rect?
+        self.unselectall()
+        pos = pygame.mouse.get_pos()
+        #        print 'touch {}'.format(pos)
+        if self.input.rect.collidepoint(pos):
+            #            print 'input {}'.format(pos)
+            self.input.setcursor(pos)
+        else:
+            for key in self.keys:
+                keyrect = Rect(key.x, key.y, key.w, key.h)
+                if keyrect.collidepoint(pos):
+                    key.selected = True
+                    key.dirty = True
+                    self.paintkeys()
+                    return
+
+        self.paintkeys()
+
+    def addkeys(self):  # Add all the keys for the virtual keyboard 
         x = self.x
         y = self.y + self.textH + self.keyH / 4
 
@@ -184,9 +262,15 @@ class VirtualKeyboard():
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 3
 
-    def paintkeys(self): # Draw the keyboard (but only if they're dirty.)
+    def paintkeys(self):
+        ''' Draw the keyboard (but only if they're dirty.) '''
         for key in self.keys:
             key.draw(self.screen, self.background, self.caps ^ self.shifted)
+        pygame.display.update()
+
+    def clear(self):
+        ''' Put the screen back to before we started '''
+        self.screen.blit(self.screenCopy, (0, 0))
         pygame.display.update()
 
 

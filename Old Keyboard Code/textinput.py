@@ -121,6 +121,21 @@ class TextInput(): # Handles the text input box and manages the cursor
             x = x + textpos.width + 1
         self.screen.blit(self.cursorlayer, (x, y))
 
+    def setcursor(self, pos):  # move cursor to char nearest position (x,y)
+        line = int((pos[1] - self.y) / self.lineH)  # vertical
+        if line > 1: line = 1  # only 2 lines
+        x = pos[0] - self.x + line * self.w  # virtual x position
+        p = 0
+        l = len(self.text)
+        while p < l:
+            text = self.txtFont.render(self.text[:p + 1], 1, (255, 255, 255))  # how many pixels to next char?
+            rtext = text.get_rect()
+            textX = rtext.x + rtext.width
+            if textX >= x: break  # we found it
+            p += 1
+        self.cursorpos = p
+        self.draw()
+
     def __spacelines(self, text, width): # fits text into lines of the given width, breaking on spaces
         words = text.split()
         count = len(words)

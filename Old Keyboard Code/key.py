@@ -2,12 +2,8 @@
 
 # TODO: add repeats when holding a key down
 
-import pygame
+import pygame, globals
 from pygame.locals import *
-from string import maketrans
-
-Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
-                      'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
 
 class VKey(object): # A single key for the VirtualKeyboard
     def __init__(self, caption, x, y, w, h, font):
@@ -26,15 +22,19 @@ class VKey(object): # A single key for the VirtualKeyboard
         self.dirty = True
         self.keylayer = pygame.Surface((self.w, self.h)).convert()
         self.keylayer.fill((128, 128, 128))  # 0,0,0
+        ##        self.keylayer.set_alpha(160)
         # Pre draw the border and store in the key layer
         pygame.draw.rect(self.keylayer, (255, 255, 255), (0, 0, self.w, self.h), 1)
 
-    def draw(self, screen, background, shifted=False, forcedraw=False): # Draw this key if it needs redrawing
+    def draw(self, screen, background, shifted=False, forcedraw=False):
+        '''  Draw one key if it needs redrawing '''
         if not forcedraw:
             if not self.dirty: return
 
         keyletter = self.caption
         if shifted:
+            #if self.shiftkey:
+            #    self.selected = True  # highlight the Shift button
             if not self.special:
                 keyletter = self.caption.translate(Uppercase)
 
