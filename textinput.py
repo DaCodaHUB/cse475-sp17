@@ -29,9 +29,8 @@ class TextInput(): # Handles the text input box and manages the cursor
         rtX = tX.get_rect()  # how big is it?
         self.lineChars = int(self.w / (rtX.width / 10)) - 1  # chars per line (horizontal)
         self.lineH = rtX.height  # pixels per line (vertical)
-        #        print 'txtinp: width={} rtX={} font={} lineChars={} lineH={}'.format(self.w,rtX,fsize, self.lineChars,self.lineH)
 
-        self.cursorlayer = pygame.Surface((2, 22))  # thin vertical line
+        self.cursorlayer = pygame.Surface((1, self.lineH * .8))  # thin vertical line
         self.cursorlayer.fill((255, 255, 255))  # white vertical line
         self.cursorvis = True
 
@@ -43,8 +42,7 @@ class TextInput(): # Handles the text input box and manages the cursor
         #lines = self.__spacelines("Mar. Good now, sit down, and tell me he that knows, Why this same strict and most observant watch So nightly toils the subject of the land, And why such daily cast of brazen cannon And foreign mart for implements of war;", 50);
         #print lines
 
-    def draw(self):
-        ''' Draw the text input box '''
+    def draw(self): # Draw this text input box
         self.layer.fill((0, 0, 0))  # clear the layer
         pygame.draw.rect(self.layer, (255, 255, 255), (0, 0, self.w, self.h), 1)  # draw the box
 

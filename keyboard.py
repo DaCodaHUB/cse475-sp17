@@ -9,6 +9,8 @@ from string import maketrans
 
 Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
+Chars = {97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 96, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 91, 93, 92, 59, 39, 44, 46, 47}
+
 
 class VirtualKeyboard():
     def __init__(self, screen):
@@ -62,7 +64,7 @@ class VirtualKeyboard():
                         if e.key == K_RETURN:
                             #return self.input.text  # Return what the user entered
                             print "return"
-                            # TODO: Add newline here
+                            # TODO: could add newline here
                         elif e.key == K_LEFT:
                             self.input.deccursor()
                             pygame.display.flip()
@@ -86,7 +88,7 @@ class VirtualKeyboard():
                             self.caps = True
                             self.togglecaps()
                             self.paintkeys()
-                        else:
+                        elif(e.key in Chars):
                             charac = chr(e.key)
                             self.selectkey(charac)
                             if self.caps ^ self.shifted:
