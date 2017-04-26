@@ -9,7 +9,8 @@ from string import maketrans
 
 Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
-Chars = {97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 96, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 91, 93, 92, 59, 39, 44, 46, 47}
+# codes of the keys that we use
+#Chars = {97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 96, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 91, 93, 92, 59, 39, 44, 46, 47}
 
 
 class VirtualKeyboard():
@@ -88,7 +89,9 @@ class VirtualKeyboard():
                             self.caps = True
                             self.togglecaps()
                             self.paintkeys()
-                        elif(e.key in Chars):
+                        #elif(e.key in Chars):
+                        # the key is one of the keys that should be written to the screen
+                        elif (e.key >= 96 and e.key <= 122) or (e.key >= 44 and e.key <= 57) or (e.key >= 91 and e.key <= 93) or e.key == 39 or e.key == 59 or e.key == 61:
                             charac = chr(e.key)
                             self.selectkey(charac)
                             if self.caps ^ self.shifted:
