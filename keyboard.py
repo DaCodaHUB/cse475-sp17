@@ -5,6 +5,10 @@ from key import VKey
 from textinput import TextInput
 from pygame.locals import *
 from screeninfo import get_monitors
+from string import maketrans
+
+Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
+                      'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
 
 class VirtualKeyboard():
     def __init__(self, screen):
@@ -85,6 +89,8 @@ class VirtualKeyboard():
                         else:
                             charac = chr(e.key)
                             self.selectkey(charac)
+                            if self.caps ^ self.shifted:
+                                charac = chr(e.key).translate(Uppercase)
                             self.input.addcharatcursor(charac)
                             self.paintkeys()
 
@@ -158,28 +164,26 @@ class VirtualKeyboard():
         x = self.x + 1
         y += self.keyH + self.keyH / 4
 
-        #        print 'addkeys keyW {} keyH {}'.format(self.keyW, self.keyH)
-
         onekey = VKey('Shift', x, y, int(self.keyW * 2.5), self.keyH, self.keyFont)
-        onekey.special = True
+        onekey.noTrans = True
         onekey.shiftkey = True
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 6
 
         onekey = VKey('Space', x, y, self.keyW * 5, self.keyH, self.keyFont)
-        onekey.special = True
+        onekey.noTrans = True
         onekey.spacekey = True
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 6
 
         onekey = VKey('Enter', x, y, int(self.keyW * 2.5), self.keyH, self.keyFont)
-        onekey.special = True
+        onekey.noTrans = True
         onekey.enter = True
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 3
 
         onekey = VKey('<-', x, y, int(self.keyW * 1.2 + 0.5), self.keyH, self.keyFont)
-        onekey.special = True
+        onekey.noTrans = True
         onekey.bskey = True
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 3

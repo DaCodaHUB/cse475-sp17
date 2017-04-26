@@ -16,7 +16,7 @@ class VKey(object): # A single key for the VirtualKeyboard
         self.caption = caption
         self.w = w + 1  # overlap borders
         self.h = h + 1  # overlap borders
-        self.special = False
+        self.noTrans = False
         self.enter = False
         self.bskey = False
         self.spacekey = False
@@ -35,7 +35,7 @@ class VKey(object): # A single key for the VirtualKeyboard
 
         keyletter = self.caption
         if shifted:
-            if not self.special:
+            if not self.noTrans:
                 keyletter = self.caption.translate(Uppercase)
 
         position = Rect(self.x, self.y, self.w, self.h)
