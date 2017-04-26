@@ -19,7 +19,6 @@ class VirtualKeyboard():
         self.rect = self.screen.get_rect()
         self.w = self.rect.width
         self.h = self.rect.height
-
         self.screenCopy = screen.copy()
 
         # create a background surface
@@ -217,7 +216,7 @@ def main():
 
     surf = pygame.display.set_mode([window_width, window_height])
     vkeybd = VirtualKeyboard(surf)
-    userinput = vkeybd.run()
+    userinput = vkeybd.run("This is a very long and interesting story about how one day long ago there was a")
     print "User Entered: " + userinput
 
 if __name__ == "__main__":
