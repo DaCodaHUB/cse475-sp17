@@ -1,6 +1,10 @@
-# Adapted from: https://github.com/wbphelps/VKeyboard
+ # Adapted from: https://github.com/wbphelps/VKeyboard
 
-# TODO: add autoscroll to textbox
+# TODO: add autoscroll to textbox, up and down arrow key movement
+
+#Demo:
+ #String that lights up the corresponding keys at 1 sec intervals
+ #Home row keys are red when no finger is resting on it and turn off when there is a finger resting
 
 import pygame
 from pygame.locals import *
@@ -32,6 +36,7 @@ class TextInput(): # Handles the text input box and manages the cursor
 
         self.cursorlayer = pygame.Surface((1, self.lineH * .8))  # thin vertical line
         self.cursorlayer.fill((255, 255, 255))  # white vertical line
+        self.cursorlayer.set_alpha(255 * .8) # transparency
         self.cursorvis = True
 
         self.cursorX = len(text) % self.lineChars

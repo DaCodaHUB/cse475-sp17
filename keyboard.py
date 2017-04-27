@@ -192,7 +192,7 @@ class VirtualKeyboard():
         self.keys.append(onekey)
         x += onekey.w + self.keyW / 3
 
-    def paintkeys(self): # Draw the keyboard (but only if they're dirty.)
+    def paintkeys(self): # Draw the keyboard (but only if they're dirty)
         for key in self.keys:
             key.draw(self.screen, self.background, self.caps ^ self.shifted)
         pygame.display.update()
@@ -216,7 +216,8 @@ def main():
 
     surf = pygame.display.set_mode([window_width, window_height])
     vkeybd = VirtualKeyboard(surf)
-    userinput = vkeybd.run("This is a very long and interesting story about how one day long ago there was a")
+    #userinput = vkeybd.run("This is a very long and interesting story about how one day long ago there was a")
+    userinput = vkeybd.run()
     print "User Entered: " + userinput
 
 if __name__ == "__main__":
