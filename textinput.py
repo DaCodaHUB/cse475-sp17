@@ -12,8 +12,6 @@ from pygame.locals import *
 class TextInput(): # Handles the text input box and manages the cursor
     def __init__(self, screen, text, x, y, w, h):
         self.screen = screen
-        self.text = text
-        self.cursorpos = len(text)
         self.x = x
         self.y = y
 
@@ -25,22 +23,27 @@ class TextInput(): # Handles the text input box and manages the cursor
         self.background.fill((0, 0, 0))  # fill with black
 
         rect = screen.get_rect()
-        fsize = int(rect.height / 12 + 0.5)  # font size proportional to screen height
+        fsize = int(rect.height / 20 + 0.5)  # font size proportional to screen height
         self.txtFont = pygame.font.SysFont('Courier New', fsize, bold=True)
-        # attempt to figure out how many chars will fit on a line
-        # this does not work with proportional fonts
+        # attempt to figure out how many chars will fit on a line - does not work with proportional fonts
         tX = self.txtFont.render("XXXXXXXXXX", 1, (255, 255, 0))  # 10 chars
         rtX = tX.get_rect()  # how big is it?
         self.lineChars = int(self.w / (rtX.width / 10)) - 1  # chars per line (horizontal)
         self.lineH = rtX.height  # pixels per line (vertical)
+        self.numLines = h / self.lineH
+        print "Numlines: {}".format(self.numLines)
+
+        self.text = self.__spacelines(text, rtX.width / 5)
+        self.lines = len(self.text)
 
         self.cursorlayer = pygame.Surface((1, self.lineH * .8))  # thin vertical line
         self.cursorlayer.fill((255, 255, 255))  # white vertical line
         self.cursorlayer.set_alpha(255 * .8) # transparency
         self.cursorvis = True
 
-        self.cursorX = len(text) % self.lineChars
-        self.cursorY = int(len(text) / self.lineChars)  # line 1
+        self.cursorpos = len(text)
+        #self.cursorX = len(text) % self.lineChars
+        #self.cursorY = int(len(text) / self.lineChars)  # line 1
 
         self.draw()
 
@@ -51,22 +54,22 @@ class TextInput(): # Handles the text input box and manages the cursor
         self.layer.fill((0, 0, 0))  # clear the layer
         pygame.draw.rect(self.layer, (255, 255, 255), (0, 0, self.w, self.h), 1)  # draw the box
 
-        length = len(self.text)
-        if length > 2*self.lineChars: # only show the last 2 lines, wrapping text
-            txt1 = self.text[length - 2*self.lineChars : length - self.lineChars]  # line 1
-            txt2 = self.text[length - self.lineChars:]  # line 2
+        print "TEXT: {}".format(self.text)
+        self.lines = len(self.text)
+        print "LINES: {}".format(self.lines)
+        if self.lines > self.numLines: # only show the last lines visible, wrapping text
+            visibleLines = self.text[self.lines - 1 - self.numLines : self.lines]
         else:
-            txt1 = self.text[:self.lineChars]  # line 1
-            txt2 = self.text[self.lineChars:]  # line 2
+            visibleLines = self.text[:self.lines]
 
-        t1 = self.txtFont.render(txt1, 1, (255, 255, 0))  # line 1
-        self.layer.blit(t1, (4, 4))
-        t2 = self.txtFont.render(txt2, 1, (255, 255, 0))  # line 2
-        self.layer.blit(t2, (4, 4 + self.lineH))
+        for i in range(len(visibleLines)):
+            t1 = self.txtFont.render(visibleLines[i], 1, (255, 255, 0))
+            self.layer.blit(t1, (4, 4+i*self.lineH))
 
         self.screen.blit(self.background, self.rect)
         self.screen.blit(self.layer, self.rect)
-        self.drawcursor()
+
+        #self.drawcursor()
 
         pygame.display.update()
 

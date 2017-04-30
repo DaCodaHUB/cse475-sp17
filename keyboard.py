@@ -23,7 +23,7 @@ class VirtualKeyboard():
 
         # create a background surface
         self.background = pygame.Surface(self.rect.size)
-        self.background.fill((0, 0, 0))  # fill with black
+        self.background.fill((0, 0, 0))  # fill with blackthere
         self.background.set_alpha(127)  # 50% transparent
         # blit background to screen
         self.screen.blit(self.background, (0, 0))
@@ -216,8 +216,8 @@ def main():
 
     surf = pygame.display.set_mode([window_width, window_height])
     vkeybd = VirtualKeyboard(surf)
-    #userinput = vkeybd.run("This is a very long and interesting story about how one day long ago there was a")
-    userinput = vkeybd.run()
+    userinput = vkeybd.run("This is a very long and interesting story about how one day long ago there was a")
+    #userinput = vkeybd.run()
     print "User Entered: " + userinput
 
 if __name__ == "__main__":
