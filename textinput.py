@@ -6,7 +6,7 @@
  #String that lights up the corresponding keys at 1 sec intervals
  #Home row keys are red when no finger is resting on it and turn off when there is a finger resting
 
-import pygame
+import pygame, textwrap
 from pygame.locals import *
 
 class TextInput(): # Handles the text input box and manages the cursor
@@ -28,13 +28,14 @@ class TextInput(): # Handles the text input box and manages the cursor
         # attempt to figure out how many chars will fit on a line - does not work with proportional fonts
         tX = self.txtFont.render("XXXXXXXXXX", 1, (255, 255, 0))  # 10 chars
         rtX = tX.get_rect()  # how big is it?
-        self.lineChars = int(self.w / (rtX.width / 10)) - 1  # chars per line (horizontal)
+        self.lineChars = int(self.w / (rtX.width / 10))  # chars per line (horizontal)
         self.lineH = rtX.height  # pixels per line (vertical)
-        self.numLines = h / self.lineH
+        self.numLines = h / self.lineH # number of visible lines
+        #self.lineW = rtX.width / 5 - 4
         print "Numlines: {}".format(self.numLines)
 
-        self.text = self.__spacelines(text, rtX.width / 5)
-        self.lines = len(self.text)
+        print "linechars: {}".format(self.lineChars)
+        self.text = textwrap.wrap(text, self.lineChars)
 
         self.cursorlayer = pygame.Surface((1, self.lineH * .8))  # thin vertical line
         self.cursorlayer.fill((255, 255, 255))  # white vertical line
@@ -55,16 +56,15 @@ class TextInput(): # Handles the text input box and manages the cursor
         pygame.draw.rect(self.layer, (255, 255, 255), (0, 0, self.w, self.h), 1)  # draw the box
 
         print "TEXT: {}".format(self.text)
-        self.lines = len(self.text)
-        print "LINES: {}".format(self.lines)
-        if self.lines > self.numLines: # only show the last lines visible, wrapping text
-            visibleLines = self.text[self.lines - 1 - self.numLines : self.lines]
+        lines = len(self.text)
+        if lines > self.numLines: # only show the last lines visible, wrapping text
+            visibleLines = self.text[lines - self.numLines : lines]
         else:
-            visibleLines = self.text[:self.lines]
+            visibleLines = self.text[:lines]
 
         for i in range(len(visibleLines)):
             t1 = self.txtFont.render(visibleLines[i], 1, (255, 255, 0))
-            self.layer.blit(t1, (4, 4+i*self.lineH))
+            self.layer.blit(t1, (4, 4 + i*self.lineH))
 
         self.screen.blit(self.background, self.rect)
         self.screen.blit(self.layer, self.rect)
@@ -86,14 +86,22 @@ class TextInput(): # Handles the text input box and manages the cursor
             self.drawcursor()
         pygame.display.update()
 
-    def addcharatcursor(self, letter): # Add a character whereever the cursor is currently located
+    def addcharatcursor(self, letter): # Add a character where the cursor is currently located
         if self.cursorpos < len(self.text):
             # Inserting in the middle
             self.text = self.text[:self.cursorpos] + letter + self.text[self.cursorpos:]
             self.cursorpos += 1
             self.draw()
             return
-        self.text += letter
+        lines = len(self.text)
+        self.text[lines - 1] += letter
+
+        if(len(self.text[lines-1]) > self.lineChars):
+            splitLines = textwrap.wrap(self.text[lines-1], self.lineChars)
+            print splitLines
+            self.text[lines - 1] = splitLines[0]
+            self.text.append(splitLines[1])
+
         self.cursorpos += 1
         self.draw()
 
@@ -126,83 +134,3 @@ class TextInput(): # Handles the text input box and manages the cursor
             textpos = rtext.get_rect()
             x = x + textpos.width + 1
         self.screen.blit(self.cursorlayer, (x, y))
-
-    def __spacelines(self, text, width): # fits text into lines of the given width, breaking on spaces
-        words = text.split()
-        count = len(words)
-        offsets = [0]
-        for w in words:
-            offsets.append(offsets[-1] + len(w))
-
-        minima = [0] + [10 ** 20] * count
-        breaks = [0] * (count + 1)
-
-        def cost(i, j):
-            w = offsets[j] - offsets[i] + j - i - 1
-            if w > width:
-                return 10 ** 10 * (w - width)
-            return minima[i] + (width - w) ** 2
-
-        def smawk(rows, columns):
-            stack = []
-            i = 0
-            while i < len(rows):
-                if stack:
-                    c = columns[len(stack) - 1]
-                    if cost(stack[-1], c) < cost(rows[i], c):
-                        if len(stack) < len(columns):
-                            stack.append(rows[i])
-                        i += 1
-                    else:
-                        stack.pop()
-                else:
-                    stack.append(rows[i])
-                    i += 1
-            rows = stack
-
-            if len(columns) > 1:
-                smawk(rows, columns[1::2])
-
-            i = j = 0
-            while j < len(columns):
-                if j + 1 < len(columns):
-                    end = breaks[columns[j + 1]]
-                else:
-                    end = rows[-1]
-                c = cost(rows[i], columns[j])
-                if c < minima[columns[j]]:
-                    minima[columns[j]] = c
-                    breaks[columns[j]] = rows[i]
-                if rows[i] < end:
-                    i += 1
-                else:
-                    j += 2
-
-        n = count + 1
-        i = 0
-        offset = 0
-        while True:
-            r = min(n, 2 ** (i + 1))
-            edge = 2 ** i + offset
-            smawk(range(0 + offset, edge), range(edge, r + offset))
-            x = minima[r - 1 + offset]
-            for j in range(2 ** i, r - 1):
-                y = cost(j + offset, r - 1 + offset)
-                if y <= x:
-                    n -= j
-                    i = 0
-                    offset += j
-                    break
-            else:
-                if r == n:
-                    break
-                i = i + 1
-
-        lines = []
-        j = count
-        while j > 0:
-            i = breaks[j]
-            lines.append(' '.join(words[i:j]))
-            j = i
-        lines.reverse()
-        return lines
