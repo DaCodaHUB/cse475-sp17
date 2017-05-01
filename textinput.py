@@ -32,9 +32,9 @@ class TextInput(): # Handles the text input box and manages the cursor
         self.lineH = rtX.height  # pixels per line (vertical)
         self.numLines = h / self.lineH # number of visible lines
         #self.lineW = rtX.width / 5 - 4
-        print "Numlines: {}".format(self.numLines)
+        print "Num visible lines: {}".format(self.numLines)
 
-        print "linechars: {}".format(self.lineChars)
+        print "number of chars per line: {}".format(self.lineChars)
         self.text = textwrap.wrap(text, self.lineChars)
 
         self.cursorlayer = pygame.Surface((1, self.lineH * .8))  # thin vertical line
@@ -42,14 +42,11 @@ class TextInput(): # Handles the text input box and manages the cursor
         self.cursorlayer.set_alpha(255 * .8) # transparency
         self.cursorvis = True
 
-        self.cursorpos = len(text)
-        #self.cursorX = len(text) % self.lineChars
-        #self.cursorY = int(len(text) / self.lineChars)  # line 1
+        lastLineIndex = len(self.text)-1
+        self.cursorX = len(self.text[lastLineIndex])
+        self.cursorY = lastLineIndex
 
         self.draw()
-
-        #lines = self.__spacelines("Mar. Good now, sit down, and tell me he that knows, Why this same strict and most observant watch So nightly toils the subject of the land, And why such daily cast of brazen cannon And foreign mart for implements of war;", 50);
-        #print lines
 
     def draw(self): # Draw this text input box
         self.layer.fill((0, 0, 0))  # clear the layer
@@ -87,42 +84,50 @@ class TextInput(): # Handles the text input box and manages the cursor
         pygame.display.update()
 
     def addcharatcursor(self, letter): # Add a character where the cursor is currently located
-        if self.cursorpos < len(self.text):
-            # Inserting in the middle
-            self.text = self.text[:self.cursorpos] + letter + self.text[self.cursorpos:]
-            self.cursorpos += 1
-            self.draw()
-            return
-        lines = len(self.text)
-        self.text[lines - 1] += letter
 
-        if(len(self.text[lines-1]) > self.lineChars):
-            splitLines = textwrap.wrap(self.text[lines-1], self.lineChars)
+        # Add case for inserting in the middle
+
+        self.text[self.cursorY] += letter
+
+        if(len(self.text[self.cursorY]) > self.lineChars):
+            splitLines = textwrap.wrap(self.text[self.cursorY], self.lineChars)
             print splitLines
-            self.text[lines - 1] = splitLines[0]
+            self.text[self.cursorY] = splitLines[0]
             self.text.append(splitLines[1])
+            self.cursorX = len(self.text[len(self.text)-1])# may be bug here
+            self.cursorY += 1
+        else:
+            self.cursorX += 1
 
-        self.cursorpos += 1
         self.draw()
 
     def backspace(self): # Delete a character before the cursor position
-        if self.cursorpos == 0: return
-        self.text = self.text[:self.cursorpos - 1] + self.text[self.cursorpos:]
-        self.cursorpos -= 1
+        if len(self.text[0]) == 0: return
+        self.text[self.cursorY] = self.text[self.cursorY][:self.cursorX - 1] + self.text[self.cursorY][self.cursorX:]
+        self.deccursor()
         self.draw()
         return
 
     def deccursor(self): # Move the cursor one space left
-        if self.cursorpos == 0: return
-        self.cursorpos -= 1
+        if self.cursorX == 0 and self.cursorY == 0: return
+        if self.cursorX == 0:
+            self.cursorY -= 1
+            self.cursorX = len(self.text[self.cursorY])
+        else:
+            self.cursorX -= 1
         self.draw()
 
     def inccursor(self): # Move the cursor one space right (but not beyond the end of the text)
-        if self.cursorpos == len(self.text): return
-        self.cursorpos += 1
+        if self.cursorX == 0 and self.cursorY == 0: return
+        if self.cursorX == len(self.text[self.cursorY]):
+            self.cursorY += 1
+            self.cursorX = 0
+        else:
+            self.cursorX += 1
         self.draw()
 
     def drawcursor(self): # Draw the cursor
+        # need a way to find the lines that are currently visible
         line = int(self.cursorpos / self.lineChars)  # line number
         if line > 1: line = 1
         x = 4
