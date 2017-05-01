@@ -87,7 +87,10 @@ class TextInput(): # Handles the text input box and manages the cursor
 
         # Add case for inserting in the middle
 
-        self.text[self.cursorY] += letter
+        if(len(self.text) <= self.cursorY):
+            self.text.append(letter)
+        else:
+            self.text[self.cursorY] += letter
 
         if(len(self.text[self.cursorY]) > self.lineChars):
             splitLines = textwrap.wrap(self.text[self.cursorY], self.lineChars)
@@ -102,15 +105,18 @@ class TextInput(): # Handles the text input box and manages the cursor
         self.draw()
 
     def backspace(self): # Delete a character before the cursor position
-        if len(self.text[0]) == 0: return
+        if len(self.text) == 0: return
         self.text[self.cursorY] = self.text[self.cursorY][:self.cursorX - 1] + self.text[self.cursorY][self.cursorX:]
+        if(self.text[self.cursorY] == ''):
+            self.text.pop()
         self.deccursor()
+        print "Y, X: {} {}".format(self.cursorY, self.cursorX)
         self.draw()
         return
 
     def deccursor(self): # Move the cursor one space left
-        if self.cursorX == 0 and self.cursorY == 0: return
-        if self.cursorX == 0:
+        if self.cursorX == 1 and self.cursorY == 0: return
+        if self.cursorX == 1:
             self.cursorY -= 1
             self.cursorX = len(self.text[self.cursorY])
         else:
@@ -128,6 +134,7 @@ class TextInput(): # Handles the text input box and manages the cursor
 
     def drawcursor(self): # Draw the cursor
         # need a way to find the lines that are currently visible
+
         line = int(self.cursorpos / self.lineChars)  # line number
         if line > 1: line = 1
         x = 4

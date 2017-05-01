@@ -216,8 +216,8 @@ def main():
 
     surf = pygame.display.set_mode([window_width, window_height])
     vkeybd = VirtualKeyboard(surf)
-    userinput = vkeybd.run("This is a very long and interesting storyy about how one day long ago there was a")
-    #userinput = vkeybd.run()
+    #userinput = vkeybd.run("This is a very long and interesting storyy about how one day long ago there was a")
+    userinput = vkeybd.run("hi")
     print "User Entered: " + userinput
 
 if __name__ == "__main__":
