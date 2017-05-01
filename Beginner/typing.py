@@ -27,8 +27,9 @@ TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 
 def main():
-    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR
+    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS
     pygame.init()
+    ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
     pygame.event.set_allowed(None)
     pygame.event.set_allowed([KEYUP, QUIT])
@@ -37,6 +38,8 @@ def main():
     TITLEFONT = pygame.font.Font('freesansbold.ttf', 60)
     BIGFONT = pygame.font.Font('freesansbold.ttf', 160)
     LEVEL = 0
+    ERRORS = 0
+    WORDS = 0
     TITLE = "Beginner Mode"
 
     pygame.display.set_caption(TITLE)
@@ -51,11 +54,13 @@ def main():
         current_level = LEVEL
         wordArray = list(CUR.fetchall())
         random.shuffle(wordArray)
+        start = time.time()
         for word in wordArray:
             if current_level != LEVEL:
                 break
 
-            show_word(word, 5, 9)
+            show_word(word, time.time() - start)
+            WORDS += 1
 
             pygame.display.update()
             #pygame.time.wait(1000)
@@ -67,8 +72,8 @@ def make_text_objs(text, font, fontcolor):
     return surf, surf.get_rect()
 
 
-def show_word(word, words, errors):
-    global LEVEL
+def show_word(word, elapsed_time):
+    global LEVEL, ERRORS, WORDS
     text = word[0]
     DISPLAYSURF.fill(BGCOLOR)
     typed = ''
@@ -78,13 +83,21 @@ def show_word(word, words, errors):
     level_rect.topleft = (10, 10)
     DISPLAYSURF.blit(level_surf, level_rect)
 
-    error_surf, error_rect = make_text_objs('Errors: ' + str(errors), SMALLFONT, TEXTCOLOR)
+    error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
     DISPLAYSURF.blit(error_surf, error_rect)
 
-    word_level_surf, word_level_rect = make_text_objs('Words/Min: ' + str(int(words)), SMALLFONT, TEXTCOLOR)
+    word_level_surf, word_level_rect = make_text_objs('Words/Min: ' + str(22), SMALLFONT, TEXTCOLOR)
     word_level_rect.topright = (WINDOWWIDTH - 10, 10)
     DISPLAYSURF.blit(word_level_surf, word_level_rect)
+
+    word_surf, word_rect = make_text_objs('Words: ' + str(WORDS), SMALLFONT, TEXTCOLOR)
+    word_rect.bottomleft = (10, WINDOWHEIGHT - 10)
+    DISPLAYSURF.blit(word_surf, word_rect)
+
+    time_surf, time_rect = make_text_objs('Time: ' + str(int(elapsed_time)), SMALLFONT, TEXTCOLOR)
+    time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
+    DISPLAYSURF.blit(time_surf, time_rect)
 
     title_surf, title_rect = make_text_objs(text.upper(), BIGFONT, TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
@@ -126,6 +139,11 @@ def show_word(word, words, errors):
                     level_surf, level_rect = make_text_objs('Level: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
                     level_rect.topleft = (10, 10)
                     DISPLAYSURF.blit(level_surf, level_rect)
+                elif pygame.key.name(event.key) != "unknown key":
+                    ERROR_SOUND.play()
+                    ERRORS += 1
+                    #print "Expected key: {}\tGot key: {}".format(next_letter, pygame.key.name(event.key))
+                    
                 '''
                 elif K_0 <= event.key <= K_7:
                     newlevel = int(pygame.key.name(event.key))
