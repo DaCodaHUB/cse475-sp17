@@ -141,7 +141,7 @@ def show_word(word):
                 elif pygame.key.name(event.key) != "unknown key":
                     ERROR_SOUND.play()
                     ERRORS += 1
-                    #print "Expected key: {}\tGot key: {}".format(next_letter, pygame.key.name(event.key))
+                    #print "Expected key: {}\tGot key: {}".format(next_lffdddetter, pygame.key.name(event.key))
                     error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
                     error_surf.fill(BGCOLOR)
                     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
