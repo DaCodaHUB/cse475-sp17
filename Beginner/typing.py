@@ -1,5 +1,4 @@
-# Toddler Type
-# By Jon Anderson squiggs@theskedge.com
+# adapted from https://github.com/NoOutlet/ToddlerType
 
 import random
 import sqlite3
@@ -13,6 +12,7 @@ from pygame.locals import *
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/words.db")
 
+# could remove the hard-coded dimensions
 WINDOWWIDTH = 1024
 WINDOWHEIGHT = 768
 
@@ -27,7 +27,7 @@ TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 
 def main():
-    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS
+    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
@@ -40,6 +40,7 @@ def main():
     LEVEL = 0
     ERRORS = 0
     WORDS = 0
+    WORDS_PER_MIN = 0.0
     TITLE = "Beginner Mode"
 
     pygame.display.set_caption(TITLE)
@@ -88,15 +89,13 @@ def show_word(word):
     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
     DISPLAYSURF.blit(error_surf, error_rect)
 
-    word_level_surf, word_level_rect = make_text_objs('Words/Min: ' + str(22), SMALLFONT, TEXTCOLOR)
+    word_level_surf, word_level_rect = make_text_objs('Words/Min: %.1f' % WORDS_PER_MIN, SMALLFONT, TEXTCOLOR)
     word_level_rect.topright = (WINDOWWIDTH - 10, 10)
     DISPLAYSURF.blit(word_level_surf, word_level_rect)
 
     word_surf, word_rect = make_text_objs('Words: ' + str(WORDS), SMALLFONT, TEXTCOLOR)
     word_rect.bottomleft = (10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(word_surf, word_rect)
-
-
 
     title_surf, title_rect = make_text_objs(text.upper(), BIGFONT, TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
@@ -182,19 +181,30 @@ def show_title_screen(text):
 
 # runs in separate thread and shows the time on the screen
 def update_timer(start):
-    global DISPLAYSURF
+    global DISPLAYSURF, WORDS, WORDS_PER_MIN
     t = threading.Timer(.1, update_timer, (start,))
     t.daemon = True
     t.start()
     #print "TIME: {}".format(time.time() - start)
-    difference = str(int(time.time() - start))
-    time_surf, time_rect = make_text_objs('Time: ' + difference, SMALLFONT, TEXTCOLOR)
+    difference = int(time.time() - start)
+    time_surf, time_rect = make_text_objs('Time: ' + str(difference), SMALLFONT, TEXTCOLOR)
     time_surf.fill(BGCOLOR)
     time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(time_surf, time_rect)
-    time_surf, time_rect = make_text_objs('Time: ' + difference, SMALLFONT, TEXTCOLOR)
+    time_surf, time_rect = make_text_objs('Time: ' + str(difference), SMALLFONT, TEXTCOLOR)
     time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(time_surf, time_rect)
+
+    if(difference > 0 and difference % 5 == 0): # update words per min every 5s
+        WORDS_PER_MIN = float(WORDS) / difference * 60
+        word_level_surf, word_level_rect = make_text_objs('Words/Min: %.1f' % WORDS_PER_MIN, SMALLFONT, TEXTCOLOR)
+        word_level_surf.fill(BGCOLOR)
+        word_level_rect.topright = (WINDOWWIDTH - 10, 10)
+        DISPLAYSURF.blit(word_level_surf, word_level_rect)
+        word_level_surf, word_level_rect = make_text_objs('Words/Min: %.1f' % WORDS_PER_MIN, SMALLFONT, TEXTCOLOR)
+        word_level_rect.topright = (WINDOWWIDTH - 10, 10)
+        DISPLAYSURF.blit(word_level_surf, word_level_rect)
+
     pygame.display.update()
 
 
