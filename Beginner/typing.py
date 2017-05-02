@@ -6,7 +6,7 @@ import sqlite3
 import pygame
 import sys
 import os
-import locale
+import threading
 import time
 from pygame.locals import *
 
@@ -47,6 +47,7 @@ def main():
     show_title_screen(TITLE)
     pygame.event.clear()
     event = pygame.event.wait()
+    update_timer(time.time())
 
     while True:
         CUR = connection.cursor()
@@ -54,12 +55,12 @@ def main():
         current_level = LEVEL
         wordArray = list(CUR.fetchall())
         random.shuffle(wordArray)
-        start = time.time()
+
         for word in wordArray:
             if current_level != LEVEL:
                 break
 
-            show_word(word, time.time() - start)
+            show_word(word)
             WORDS += 1
 
             pygame.display.update()
@@ -72,7 +73,7 @@ def make_text_objs(text, font, fontcolor):
     return surf, surf.get_rect()
 
 
-def show_word(word, elapsed_time):
+def show_word(word):
     global LEVEL, ERRORS, WORDS
     text = word[0]
     DISPLAYSURF.fill(BGCOLOR)
@@ -95,9 +96,7 @@ def show_word(word, elapsed_time):
     word_rect.bottomleft = (10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(word_surf, word_rect)
 
-    time_surf, time_rect = make_text_objs('Time: ' + str(int(elapsed_time)), SMALLFONT, TEXTCOLOR)
-    time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
-    DISPLAYSURF.blit(time_surf, time_rect)
+
 
     title_surf, title_rect = make_text_objs(text.upper(), BIGFONT, TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
@@ -143,6 +142,13 @@ def show_word(word, elapsed_time):
                     ERROR_SOUND.play()
                     ERRORS += 1
                     #print "Expected key: {}\tGot key: {}".format(next_letter, pygame.key.name(event.key))
+                    error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
+                    error_surf.fill(BGCOLOR)
+                    error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
+                    DISPLAYSURF.blit(error_surf, error_rect)
+                    error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
+                    error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
+                    DISPLAYSURF.blit(error_surf, error_rect)
                     
                 '''
                 elif K_0 <= event.key <= K_7:
@@ -172,6 +178,23 @@ def show_title_screen(text):
     title_rect.center = (int(WINDOWWIDTH / 2) - 2, int(WINDOWHEIGHT / 2) - 2)
     DISPLAYSURF.blit(title_surf, title_rect)
 
+    pygame.display.update()
+
+# runs in separate thread and shows the time on the screen
+def update_timer(start):
+    global DISPLAYSURF
+    t = threading.Timer(.1, update_timer, (start,))
+    t.daemon = True
+    t.start()
+    #print "TIME: {}".format(time.time() - start)
+    difference = str(int(time.time() - start))
+    time_surf, time_rect = make_text_objs('Time: ' + difference, SMALLFONT, TEXTCOLOR)
+    time_surf.fill(BGCOLOR)
+    time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
+    DISPLAYSURF.blit(time_surf, time_rect)
+    time_surf, time_rect = make_text_objs('Time: ' + difference, SMALLFONT, TEXTCOLOR)
+    time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
+    DISPLAYSURF.blit(time_surf, time_rect)
     pygame.display.update()
 
 
