@@ -36,7 +36,7 @@ def main():
     DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT], pygame.FULLSCREEN)
     SMALLFONT = pygame.font.Font('freesansbold.ttf', 40)
     TITLEFONT = pygame.font.Font('freesansbold.ttf', 60)
-    BIGFONT = pygame.font.Font('freesansbold.ttf', 160)
+    BIGFONT = pygame.font.Font('freesansbold.ttf', 120)
     LEVEL = 0
     ERRORS = 0
     WORDS = 0
@@ -120,8 +120,8 @@ def show_word(word):
                 elif pygame.key.name(event.key) == next_letter:
                     break
                 elif event.key == K_UP: # up a level
-                    LEVEL = min(5, LEVEL + 1)
-                    level_surf, level_rect = make_text_objs('Level: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
+                    LEVEL = min(7, LEVEL + 1)
+                    level_surf, level_rect = make_text_objs('LevelXX: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
                     level_surf.fill(BGCOLOR)
                     level_rect.topleft = (10, 10)
                     DISPLAYSURF.blit(level_surf, level_rect)
@@ -130,7 +130,7 @@ def show_word(word):
                     DISPLAYSURF.blit(level_surf, level_rect)
                 elif event.key == K_DOWN: # down a level
                     LEVEL = max(0, LEVEL - 1)
-                    level_surf, level_rect = make_text_objs('Level: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
+                    level_surf, level_rect = make_text_objs('LevelXX: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
                     level_surf.fill(BGCOLOR)
                     level_rect.topleft = (10, 10)
                     DISPLAYSURF.blit(level_surf, level_rect)
@@ -141,7 +141,7 @@ def show_word(word):
                     ERROR_SOUND.play()
                     ERRORS += 1
                     #print "Expected key: {}\tGot key: {}".format(next_lffdddetter, pygame.key.name(event.key))
-                    error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
+                    error_surf, error_rect = make_text_objs('ErrorsXX: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
                     error_surf.fill(BGCOLOR)
                     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
                     DISPLAYSURF.blit(error_surf, error_rect)
@@ -187,7 +187,7 @@ def update_timer(start):
     t.start()
     #print "TIME: {}".format(time.time() - start)
     difference = int(time.time() - start)
-    time_surf, time_rect = make_text_objs('Time: ' + str(difference), SMALLFONT, TEXTCOLOR)
+    time_surf, time_rect = make_text_objs('TimeXX: ' + str(difference), SMALLFONT, TEXTCOLOR)
     time_surf.fill(BGCOLOR)
     time_rect.bottomright = (WINDOWWIDTH - 10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(time_surf, time_rect)
@@ -197,7 +197,7 @@ def update_timer(start):
 
     if(difference > 0 and difference % 5 == 0): # update words per min every 5s
         WORDS_PER_MIN = float(WORDS) / difference * 60
-        word_level_surf, word_level_rect = make_text_objs('Words/Min: %.1f' % WORDS_PER_MIN, SMALLFONT, TEXTCOLOR)
+        word_level_surf, word_level_rect = make_text_objs('Words/MinXX: %.1f' % WORDS_PER_MIN, SMALLFONT, TEXTCOLOR)
         word_level_surf.fill(BGCOLOR)
         word_level_rect.topright = (WINDOWWIDTH - 10, 10)
         DISPLAYSURF.blit(word_level_surf, word_level_rect)
