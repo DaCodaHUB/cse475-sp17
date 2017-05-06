@@ -55,32 +55,29 @@ class VirtualKeyboard():
 
         # main event loop (hog all processes since we're on top, but someone might want
         # to rewrite this to be more event based...
-
-        #editor_focus = True
         while True:
             time.sleep(0.02)  # 10/second is often enough
             events = pygame.event.get()
             if events is not None:
                 for e in events:
-                    #if e.type == MOUSEBUTTONDOWN:
-                    #    mouse_pos = pygame.mouse.get_pos()
-                    #    if self.input.editor.rect.collidepoint(mouse_pos):
-                    #        editor_focus = True
-                    #    else:
-                    #        editor_focus = False
                     if (e.type == KEYDOWN and e.key > 0):
                         if e.key == K_RETURN:
+                            #return self.input.text  # Return what the user entered
                             print "return"
                             # TODO: could add newline here
                         elif e.key == K_LEFT:
+                            self.input.deccursor()
                             pygame.display.flip()
                         elif e.key == K_RIGHT:
+                            self.input.inccursor()
                             pygame.display.flip()
                         elif e.key == K_BACKSPACE:
                             self.selectkey('<-')
+                            self.input.backspace()
                             self.paintkeys()
                         elif e.key == K_SPACE:
                             self.selectkey('space')
+                            self.input.addcharatcursor(' ')
                             self.paintkeys()
                         elif e.key == K_RSHIFT or e.key == K_LSHIFT:
                             self.shifted = True
@@ -98,6 +95,7 @@ class VirtualKeyboard():
                             self.selectkey(charac)
                             if self.caps ^ self.shifted:
                                 charac = chr(e.key).translate(Uppercase)
+                            self.input.addcharatcursor(charac)
                             self.paintkeys()
 
                     elif (e.type == KEYUP and e.key > 0):
@@ -111,9 +109,6 @@ class VirtualKeyboard():
                         self.paintkeys()
                     elif (e.type == pygame.QUIT):
                         return self.text  # Return what we started with
-
-                #self.input.update(editor_focus, events)
-                self.input.update(True, events)
 
     def selectkey(self, caption):
         for key in self.keys:
