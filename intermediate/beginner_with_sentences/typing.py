@@ -20,6 +20,7 @@ import os
 import threading
 import time
 from pygame.locals import *
+from string import maketrans
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/sentences.db")
@@ -37,6 +38,10 @@ BGCOLOR = BLACK
 TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
+SHIFTED = False
+
+Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
+                      'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
 
 def main():
     global DISPLAYSURF, BIGFONT, BIGFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
@@ -44,7 +49,7 @@ def main():
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
     pygame.event.set_allowed(None)
-    pygame.event.set_allowed([KEYUP, QUIT])
+    pygame.event.set_allowed([KEYUP, KEYDOWN, QUIT])
     DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT], pygame.FULLSCREEN)
     SMALLFONT = pygame.font.Font('freesansbold.ttf', 25)
     BIGFONT = pygame.font.Font('freesansbold.ttf', 40)
@@ -86,7 +91,7 @@ def make_text_objs(text, font, fontcolor):
 
 
 def show_word(word):
-    global LEVEL, ERRORS, WORDS
+    global LEVEL, ERRORS, WORDS, SHIFTED
     text = word[0]
     DISPLAYSURF.fill(BGCOLOR)
     typed = ''
@@ -108,11 +113,11 @@ def show_word(word):
     word_rect.bottomleft = (10, WINDOWHEIGHT - 10)
     DISPLAYSURF.blit(word_surf, word_rect)
 
-    title_surf, title_rect = make_text_objs(text.upper(), BIGFONT, TEXTSHADOWCOLOR)
+    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
     DISPLAYSURF.blit(title_surf, title_rect)
 
-    title_surf, title_rect = make_text_objs(text.upper(), BIGFONT, TEXTCOLOR)
+    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2) - 2, int(WINDOWHEIGHT / 2) - 2)
     DISPLAYSURF.blit(title_surf, title_rect)
 
@@ -126,11 +131,16 @@ def show_word(word):
             event = pygame.event.wait()
             if event.type == QUIT:
                 terminate()
-            elif event.type == KEYUP:
+            elif event.type == KEYDOWN and (event.key == K_RSHIFT or event.key == K_LSHIFT):
+                SHIFTED = True
+                print SHIFTED
+            elif event.type == KEYUP and event.key > 0:
+
                 if event.key == K_ESCAPE:
                     terminate()
-                elif pygame.key.name(event.key) == next_letter:
-                    break
+                elif event.key == K_RSHIFT or event.key == K_LSHIFT:
+                    SHIFTED = False
+                    print SHIFTED
                 elif event.key == K_UP: # up a level
                     LEVEL = min(7, LEVEL + 1)
                     level_surf, level_rect = make_text_objs('LevelXX: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
@@ -149,7 +159,15 @@ def show_word(word):
                     level_surf, level_rect = make_text_objs('Level: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
                     level_rect.topleft = (10, 10)
                     DISPLAYSURF.blit(level_surf, level_rect)
-                elif pygame.key.name(event.key) != "unknown key":
+                elif event.key < 256:
+                    charac = chr(event.key)
+                    if SHIFTED:
+                        charac = chr(event.key).translate(Uppercase)
+                    #print "Pygame Name: {}".format(pygame.key.name(event.key))
+                    print "Charac: {}".format(charac)
+                    if(charac == next_letter):
+                        break
+
                     ERROR_SOUND.play()
                     ERRORS += 1
                     #print "Expected key: {}\tGot key: {}".format(next_lffdddetter, pygame.key.name(event.key))
@@ -163,7 +181,7 @@ def show_word(word):
 
         to_type = to_type[1:]
         typed = typed + next_letter
-        typed_surf, typed_rect = make_text_objs(typed.upper(), BIGFONT, TEXTHIGHLIGHT)
+        typed_surf, typed_rect = make_text_objs(typed, BIGFONT, TEXTHIGHLIGHT)
         DISPLAYSURF.blit(typed_surf, title_rect)
 
 
