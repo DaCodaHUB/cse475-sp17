@@ -7,10 +7,11 @@
 #   for the Sega Genesis. Used without permission.
 # Other graphics taken from Super Mario Bros., Pac-Man, Legend of Zelda.
 
-import pygame, sys, time
+import pygame, sys, time, os
 from pygame.locals import *
 from general import game_constants
 from scene import TitleScene
+from screeninfo import get_monitors
 
 if not pygame.font:
     print "Couldn't load font library, crashing hard"
@@ -66,8 +67,11 @@ def main(argv=sys.argv):
     if len(argv) == 2 and 640 <= int(argv[1]) <= 1280:
         game_constants.w, game_constants.h = (int(argv[1]), int(argv[1])*.75)
     else:
-        game_constants.w, game_constants.h = (800,600)
+        #game_constants.w, game_constants.h = (800,600)
+        screen = get_monitors().pop()
+        game_constants.w, game_constants.h = (screen.width, int(.95 * screen.height))
 
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.init()
     screen = pygame.display.set_mode((game_constants.w, game_constants.h))
     pygame.display.set_caption('Typer Combat')

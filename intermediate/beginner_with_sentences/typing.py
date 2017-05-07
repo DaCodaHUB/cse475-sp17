@@ -22,7 +22,7 @@ import time
 from pygame.locals import *
 
 basepath = os.path.dirname(os.path.abspath(__file__))
-connection = sqlite3.connect(basepath + "/words.db")
+connection = sqlite3.connect(basepath + "/sentences.db")
 
 # could remove the hard-coded dimensions
 WINDOWWIDTH = 1024
@@ -39,21 +39,20 @@ TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 
 def main():
-    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
+    global DISPLAYSURF, BIGFONT, BIGFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
     pygame.event.set_allowed(None)
     pygame.event.set_allowed([KEYUP, QUIT])
     DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT], pygame.FULLSCREEN)
-    SMALLFONT = pygame.font.Font('freesansbold.ttf', 40)
-    TITLEFONT = pygame.font.Font('freesansbold.ttf', 60)
-    BIGFONT = pygame.font.Font('freesansbold.ttf', 120)
+    SMALLFONT = pygame.font.Font('freesansbold.ttf', 25)
+    BIGFONT = pygame.font.Font('freesansbold.ttf', 40)
     LEVEL = 0
     ERRORS = 0
     WORDS = 0
     WORDS_PER_MIN = 0.0
-    TITLE = "Beginner Mode"
+    TITLE = "Intermediate Mode"
 
     pygame.display.set_caption(TITLE)
 
@@ -64,7 +63,7 @@ def main():
 
     while True:
         CUR = connection.cursor()
-        CUR.execute("SELECT * FROM words WHERE language = 'eng' AND level = " + str(LEVEL))
+        CUR.execute("SELECT * FROM sentences WHERE level = " + str(LEVEL))
         current_level = LEVEL
         wordArray = list(CUR.fetchall())
         random.shuffle(wordArray)
@@ -161,19 +160,6 @@ def show_word(word):
                     error_surf, error_rect = make_text_objs('Errors: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
                     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
                     DISPLAYSURF.blit(error_surf, error_rect)
-                    
-                '''
-                elif K_0 <= event.key <= K_7:
-                    newlevel = int(pygame.key.name(event.key))
-                    CUR.execute("UPDATE words SET level = " + str(newlevel) + " WHERE word = '" + word[0] + "'")
-                    word_level_surf, word_level_rect = make_text_objs('Word: ' + str(newlevel), SMALLFONT, TEXTCOLOR)
-                    word_level_rect.topright = (WINDOWWIDTH - 10, 10)
-                    word_level_surf.fill(BGCOLOR)
-                    DISPLAYSURF.blit(word_level_surf, word_level_rect)
-                    word_level_surf, word_level_rect = make_text_objs('Word: ' + str(newlevel), SMALLFONT, TEXTCOLOR)
-                    word_level_rect.topright = (WINDOWWIDTH - 10, 10)
-                    DISPLAYSURF.blit(word_level_surf, word_level_rect)
-                '''
 
         to_type = to_type[1:]
         typed = typed + next_letter
@@ -182,11 +168,11 @@ def show_word(word):
 
 
 def show_title_screen(text):
-    title_surf, title_rect = make_text_objs(text, TITLEFONT, TEXTSHADOWCOLOR)
+    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
     DISPLAYSURF.blit(title_surf, title_rect)
 
-    title_surf, title_rect = make_text_objs(text, TITLEFONT, TEXTCOLOR)
+    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2) - 2, int(WINDOWHEIGHT / 2) - 2)
     DISPLAYSURF.blit(title_surf, title_rect)
 
