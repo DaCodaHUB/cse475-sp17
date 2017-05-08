@@ -7,6 +7,8 @@ basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/sentences.db")
 cur = connection.cursor()
 
+#cur.execute('DROP TABLE sentences')
+
 with open(join(basepath, "sentences.txt"), "r") as f:
     #allchars = []
     for line in f:
