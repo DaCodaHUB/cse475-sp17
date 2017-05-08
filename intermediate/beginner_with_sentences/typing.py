@@ -12,6 +12,8 @@
 	* SQLite3
 '''
 
+# TODO: word wrap long words, edit some of the sentences, highlight spaces, chars per second and words per second
+
 import random
 import sqlite3
 import pygame
@@ -135,7 +137,6 @@ def show_word(word):
                 SHIFTED = True
                 print SHIFTED
             elif event.type == KEYUP and event.key > 0:
-
                 if event.key == K_ESCAPE:
                     terminate()
                 elif event.key == K_RSHIFT or event.key == K_LSHIFT:
@@ -170,7 +171,6 @@ def show_word(word):
 
                     ERROR_SOUND.play()
                     ERRORS += 1
-                    #print "Expected key: {}\tGot key: {}".format(next_lffdddetter, pygame.key.name(event.key))
                     error_surf, error_rect = make_text_objs('ErrorsXX: ' + str(ERRORS), SMALLFONT, TEXTCOLOR)
                     error_surf.fill(BGCOLOR)
                     error_rect.center = (int(WINDOWWIDTH / 2), level_rect.center[1])
@@ -182,7 +182,11 @@ def show_word(word):
         to_type = to_type[1:]
         typed = typed + next_letter
         typed_surf, typed_rect = make_text_objs(typed, BIGFONT, TEXTHIGHLIGHT)
-        DISPLAYSURF.blit(typed_surf, title_rect)
+        #DISPLAYSURF.blit(typed_surf, title_rect)
+        rect_surf = pygame.Surface((typed_surf.get_width(), typed_surf.get_height()))
+        rect_surf.set_alpha(75)
+        rect_surf.fill(TEXTHIGHLIGHT)
+        DISPLAYSURF.blit(rect_surf, title_rect)
 
 
 def show_title_screen(text):
