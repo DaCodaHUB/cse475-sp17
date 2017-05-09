@@ -1,64 +1,72 @@
-const int CMD_LEDS = 0;
-const int CMD_CAPS = 1;
-const int ACK = 0;
-const int NUM_KEYS = 19;
-const int NUM_CAPS = 2;
+const byte CMD_LEDS = 1;
+const byte CMD_CAPS = 2;
+const byte ACK = 64;
+const byte NUM_KEYS = 19;
+const byte NUM_CAPS = 2;
 
-const int LED_OFF = 0;
-const int LED_GREEN = 1;
-const int LED_RED = 2;
-const int LED_ORANGE = 3;
+const byte LED_OFF = 1;
+const byte LED_GREEN = 2;
+const byte LED_RED = 3;
+const byte LED_ORANGE = 4;
 
-int leds[NUM_KEYS];
+byte leds[NUM_KEYS];
 
-int cap_pins[] = {11, 10};
+int cap_pins[] = {4, 5};
 const int ledPin = 13;
+
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(10, 11); // RX, TX
 
 void setup() {
   int i;
   for (i = 0; i < NUM_KEYS; i = i + 1) {
     leds[i] = LED_OFF;
   }
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(13, LOW);
   Serial.begin(9600);
+  while (!Serial) {
+    ;
+  }
+  Serial.write(ACK);
+  mySerial.begin(9600);
+  mySerial.println("Debugging");
 }
 
+byte res = 0;
+int i;
+int capValue = 0;
+
 void loop() {
-  int res = 0;
-  int i;
   if (Serial.available() > 0) {
     res = Serial.read();
-
+    mySerial.println("Command code: ");
+    mySerial.println(res, DEC);
     if (res == CMD_LEDS) {
-      // Read each of the led states
+      mySerial.println("Reading key data");
       for (i = 0; i < NUM_KEYS; i = i + 1) {
         leds[i] = Serial.read();
-        digitalWrite(ledPin, HIGH);
-        delay(1000);
-        digitalWrite(ledPin, LOW);  
-        delay(1000);
       }
-      while (Serial.available() > 0) {
-        Serial.read();
-      }
-      // Send acknowledge byte
+      mySerial.println("Done reading key data");
       Serial.write(ACK);
-      Serial.flush();
-    } else if (res == CMD_CAPS) {
-      int sensorData;
-      // Send the number of sensors first
-      Serial.write(NUM_CAPS);
-      // Send each of the sensor values
-      for (i = 0; i < NUM_CAPS; i = i + 1) {
-        sensorData = analogRead(cap_pins[i]);
-        // Divide by four to fit into a byte
-        // probably change this later
-        Serial.write(sensorData / 4);
+      // Print LED states for debugging
+      for (i = 0; i < NUM_KEYS; i = i + 1) {
+        mySerial.print(leds[i], DEC);
+        mySerial.print(' ');
       }
-      // Close it all up with an ACK
+      mySerial.println();
+    } else if (res == CMD_CAPS) {
+      mySerial.println("Sending sensor data");
+      Serial.write(NUM_CAPS);
+      for (i = 0; i < NUM_CAPS; i = i + 1) {
+        capValue = analogRead(cap_pins[i]);
+        mySerial.println(capValue);
+        // clamp the sensor value into a byte
+        Serial.write(map(capValue, 0, 1023, 0, 255));
+      }
       Serial.write(ACK);
     }
+    //mySerial.write(ACK);
   }
   delay(100);
+
 }

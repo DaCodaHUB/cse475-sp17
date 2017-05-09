@@ -4,15 +4,15 @@ import serial
 KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
 
 ## Command codes for the keyboard
-CMD_LEDS = 0    # update the state of the leds
-CMD_CAPS = 1    # retrieve the capacative sensor data
-ACK = 0
+CMD_LEDS = 1    # update the state of the leds
+CMD_CAPS = 2    # retrieve the capacative sensor data
+ACK = 64
 
 ## LED state values
-LED_OFF = 0
-LED_GREEN = 1
-LED_RED = 2
-LED_ORANGE = 3
+LED_OFF = 1
+LED_GREEN = 2
+LED_RED = 3
+LED_ORANGE = 4
 
 BAUD = 9600
 
@@ -29,12 +29,26 @@ class KeyboardSerial:
         if self.ser is not None:
             if self.ser.is_open:
                 self.ser.close()
-        # Opens a serial port
+        # Opens a serial port with a 1s timeout
         try:
             self.ser = serial.Serial(port, baudrate=BAUD)
         except serial.SerialException:
             print("Failed to connect to port " + port)
             return False
+        # Wait for initial ACK to verify serial init
+        if self.ser.read() != bytes([ACK]):
+            return False
+        return True
+
+    def disconnect(self):
+        if self.is_connected():
+            self.ser.close()
+
+    # Sends a byte over serial and waits for ACK byte
+    def send(self, byte):
+        if not self.is_connected():
+            return False
+        self.ser.write(bytes([byte]))
         return True
 
     # Take a dict of key->LED_STATE and sends the
@@ -43,7 +57,7 @@ class KeyboardSerial:
         if not self.is_connected():
             return False
         # Write the command code and number of k,v pairs
-        self.ser.write(CMD_LEDS)        
+        self.send(CMD_LEDS)        
         # Update the internal key array
         for i, key in enumerate(KEYS):
             if key in led_states:
@@ -51,27 +65,24 @@ class KeyboardSerial:
         # Send the sequence of states
         print("Sending state sequence of length " + str(len(KEYS)))
         for state in self.key_states:
-            self.ser.write(state)
-        self.ser.flush()
-        # print("Waiting for ACK")
-        # # wait for an ACK byte before returning
-        # return self.ser.read() == ACK
+            self.send(state)
+        print("Waiting for ACK")
+        # wait for an ACK byte before returning
+        return self.ser.read() == bytes([ACK])
             
     def get_sensor_data(self):
         if not self.is_connected():
             return False
         # Write the command code
-        self.ser.write(CMD_CAPS)
-        # Wait for the ACK byte
-        if self.ser.read() is not ACK:
-            print("Invalid ACK from keyboard")
-            return False
+        self.send(CMD_CAPS)
         # Get the number of sensors
-        sensor_len = self.ser.read()
+        sensor_len = int.from_bytes(self.ser.read(), byteorder='big')
+        print(str(sensor_len) + " sensors to read")
         sensors = []
         for i in range(sensor_len):
-            sensors.append(self.ser.read())
-        if self.ser.read() is not ACK:
+            cap_data = int.from_bytes(self.ser.read(), byteorder='big')
+            sensors.append(cap_data)
+        if self.ser.read() != bytes([ACK]):
             print("Expected ACK after reading sensors")
             return False
         return sensors
