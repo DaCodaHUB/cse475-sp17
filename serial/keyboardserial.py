@@ -14,7 +14,7 @@ LED_GREEN = 2
 LED_RED = 3
 LED_ORANGE = 4
 
-BAUD = 9600
+BAUD = 115200
 
 class KeyboardSerial:
     def __init__(self):
@@ -51,22 +51,30 @@ class KeyboardSerial:
         self.ser.write(bytes([byte]))
         return True
 
+    # Sends an array of bytes
+    def sendAll(self, data):
+        if not self.is_connected():
+            return False
+        self.ser.write(bytes(data))
+        return True
+
     # Take a dict of key->LED_STATE and sends the
     # updated state over the serial connection
     def update_leds(self, led_states):
         if not self.is_connected():
             return False
         # Write the command code and number of k,v pairs
-        self.send(CMD_LEDS)        
+        commands = [CMD_LEDS]
         # Update the internal key array
         for i, key in enumerate(KEYS):
             if key in led_states:
                 self.key_states[i] = led_states[key]
         # Send the sequence of states
-        print("Sending state sequence of length " + str(len(KEYS)))
+        # print("Sending state sequence of length " + str(len(KEYS)))
         for state in self.key_states:
-            self.send(state)
-        print("Waiting for ACK")
+            commands.append(state)
+        self.sendAll(commands)
+        # print("Waiting for ACK")
         # wait for an ACK byte before returning
         return self.ser.read() == bytes([ACK])
             
