@@ -67,9 +67,9 @@ def main(argv=sys.argv):
     if len(argv) == 2 and 640 <= int(argv[1]) <= 1280:
         game_constants.w, game_constants.h = (int(argv[1]), int(argv[1])*.75)
     else:
-        #game_constants.w, game_constants.h = (800,600)
-        screen = get_monitors().pop()
-        game_constants.w, game_constants.h = (screen.width, int(.95 * screen.height))
+        game_constants.w, game_constants.h = (800,600)
+        #screen = get_monitors().pop()
+        #game_constants.w, game_constants.h = (screen.width, int(.95 * screen.height))
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     pygame.init()
