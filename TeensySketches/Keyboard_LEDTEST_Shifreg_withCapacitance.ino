@@ -6,6 +6,22 @@
 int ledArray[70];
 int count;
 
+// For the sensor delay
+const int numReadings = 5;
+int readings[numReadings*8];
+int readIndex = 0;
+int sensorCount = 0;
+
+// sensor data
+int sensorData1 = 0;
+int sensorData2 = 0;
+int sensorData3 = 0;
+int sensorData4 = 0;
+int sensorData5 = 0;
+int sensorData6 = 0;
+int sensorData7 = 0;
+int sensorData8 = 0;
+
 void setup() {                
   Serial.begin(9600);
   int i;
@@ -16,9 +32,13 @@ void setup() {
   for(i=0; i<69; i++){
     ledArray[i] = 3;
   } 
+  
   //ledArray[] = 1;
   PinSetup();
   //digitalWrite(7, LOW); //Uncomment when using this sketch in PCB version
+  for (int thisReading = 0; thisReading < numReadings*8; thisReading++) {
+    sensorDelay(1000);
+  }
   count = millis();
 }
 
@@ -44,7 +64,7 @@ void loop() {
 //  Serial.println(touchRead(15));
 //  Serial.print("key D Capacitance: ");
 //  Serial.println(touchRead(0));
-  
+
   if (touchRead(16) > 4000)
     Serial.print("A  ");
   else
@@ -77,6 +97,7 @@ void loop() {
     Serial.print(";");
   else
     Serial.print("   ");
+
 //  touchRead(23); // key ;
 //  touchRead(22); // key L
 //  touchRead(19); // key K
@@ -153,3 +174,78 @@ void PinSetup(){
   }
 }
 
+void sensorDelay (int timer) {
+  int deltat = micros();
+  
+  switch (sensorCount) {
+    case 0: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(23);
+    sensorData1 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData1);
+    break;
+    case 1: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(22);
+    sensorData2 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData2);
+    break;
+    case 2: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(19);
+    sensorData3 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData3);
+    break;
+    case 3: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(18);
+    sensorData4 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData4);
+    break;
+    case 4: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(17);
+    sensorData5 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData5);
+    break;
+    case 5: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(16);
+    sensorData6 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData6);
+    break;
+    case 6: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(15);
+    sensorData7 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData7);
+    break;
+    case 7: 
+    readings[readIndex + sensorCount * numReadings] = touchRead(0);
+    sensorData8 = findMax(sensorCount * numReadings);
+    //Serial.println(sensorData8);
+    break;
+  }
+  // advance to the next position in the array:
+  if (sensorCount >= 7) {
+    readIndex = readIndex + 1;
+    sensorCount = 0;
+  } else
+    sensorCount = sensorCount + 1;
+
+  // if we're at the end of the array...
+  if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+  }
+
+  deltat = micros() - deltat;
+  //Serial.println(deltat);
+  //Serial.println();
+  if (deltat < timer) {
+    delayMicroseconds(timer - deltat);
+  }
+}
+
+int findMax(int startpos) {
+  int maxNum = 0;
+  int i;
+  for (i = startpos; i < startpos + 5; i++) {
+    if (readings[i] > maxNum)
+      maxNum = readings[i];
+  }
+  return maxNum;
+}
