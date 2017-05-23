@@ -59,7 +59,7 @@ def main():
 
     show_title_screen(TITLE)
     pygame.event.clear()
-    event = pygame.event.wait()
+    pygame.event.wait()
     update_timer(time.time())
 
     while True:

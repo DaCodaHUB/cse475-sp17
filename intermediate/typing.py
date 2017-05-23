@@ -41,6 +41,7 @@ TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 SHIFTED = False
+FIRST = True
 
 Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
@@ -67,7 +68,8 @@ def main():
 
     show_title_screen(TITLE)
     pygame.event.clear()
-    event = pygame.event.wait()
+    pygame.event.wait() # need to wait for 2 events: initial KEYDOWN & KEYUP
+    pygame.event.wait()
     update_timer(time.time())
 
     while True:
@@ -93,12 +95,8 @@ def make_text_objs(text, font, fontcolor):
     return surf, surf.get_rect()
 
 
-def draw_data():
-    global LEVEL, ERRORS, WORDS, SHIFTED, CHARS, WORDS_PER_MIN, SENTENCES
-
-
 def show_sentence(word):
-    global LEVEL, ERRORS, WORDS, SHIFTED, CHARS, WORDS_PER_MIN, SENTENCES
+    global LEVEL, ERRORS, WORDS, SHIFTED, CHARS, WORDS_PER_MIN, SENTENCES, FIRST
     text = word[0]
     DISPLAYSURF.fill(BGCOLOR)
     typed = ''
@@ -150,7 +148,7 @@ def show_sentence(word):
                 elif event.key == K_RSHIFT or event.key == K_LSHIFT:
                     SHIFTED = False
                 elif event.key == K_UP: # up a level
-                    LEVEL = min(7, LEVEL + 1)
+                    LEVEL = min(4, LEVEL + 1)
                     level_surf, level_rect = make_text_objs('LevelXX: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
                     level_surf.fill(BGCOLOR)
                     level_rect.topleft = (10, 10)
@@ -175,6 +173,8 @@ def show_sentence(word):
                     #print "Charac: {}".format(charac)
                     if(charac == next_letter):
                         break
+
+                    print "Expected: {} Typed: {}".format(next_letter, charac)
 
                     ERROR_SOUND.play()
                     ERRORS += 1
@@ -223,11 +223,11 @@ def show_sentence(word):
 
 
 def show_title_screen(text):
-    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTSHADOWCOLOR)
+    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 90), TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
     DISPLAYSURF.blit(title_surf, title_rect)
 
-    title_surf, title_rect = make_text_objs(text, BIGFONT, TEXTCOLOR)
+    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 90), TEXTCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2) - 2, int(WINDOWHEIGHT / 2) - 2)
     DISPLAYSURF.blit(title_surf, title_rect)
 

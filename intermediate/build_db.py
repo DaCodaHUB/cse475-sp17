@@ -8,6 +8,7 @@ connection = sqlite3.connect(basepath + "/sentences.db")
 cur = connection.cursor()
 
 #cur.execute('DROP TABLE sentences')
+cur.execute('CREATE TABLE sentences (sentence varchar(255), words int, chars int, level int)')
 
 with open(join(basepath, "sentences.txt"), "r") as f:
     #allchars = []
@@ -16,6 +17,9 @@ with open(join(basepath, "sentences.txt"), "r") as f:
         numChars = len(realLine)
         #allchars.append(numChars)
         numWords = len(realLine.split())
+        if realLine.count('"') % 2 == 1:
+			continue;
+			
         if numChars < 22:
             level = 0
         elif numChars < 30:
@@ -26,12 +30,14 @@ with open(join(basepath, "sentences.txt"), "r") as f:
             level = 3
         elif numChars < 55:
             level = 4
-        elif numChars < 64:
-            level = 5
-        elif numChars < 75:
-            level = 6
+        #elif numChars < 64:
+        #    level = 5
+        #elif numChars < 75:
+        #    level = 6
+        #else:
+        #    level = 7
         else:
-            level = 7
+			continue;
 
         #print "{}\t{}\t{}\t{}".format(numChars, numWords, level, realLine)
         #print "INSERT INTO sentences VALUES ('{}', '{}', '{}', '{}')".format(realLine, numWords, numChars, level)
