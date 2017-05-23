@@ -49,7 +49,11 @@ void setup() {
   int i;
   for (i = 0; i < NUM_KEYS; i++) {
     leds[i] = LED_OFF;
-    led_brightness[i] = MAX_BRIGHTNESS;
+    led_brightness[i] = 0;
+  }
+  for (i = 0; i < MAX_BRIGHTNESS + 1; i++) {
+    leds[12 + i] = LED_GREEN;
+    led_brightness[12 + i] = i; 
   }
   // Initialize the GPIO pins
   for (i = 1; i < 8; i++) {
@@ -63,9 +67,6 @@ void setup() {
   debugSerial.begin(9600);
   DEBUG_PRINTLN("Debugging");
   Serial.begin(115200);
-  while (!Serial) {
-    ;
-  }
 }
 
 void loop() {
@@ -82,7 +83,10 @@ void loop() {
   updateSerial();
   endDelay();
   // Increment the brightness counter to control PWM brightness
-  brightness_counter = (brightness_counter + 1) % MAX_BRIGHTNESS;
+  brightness_counter++;
+  if (brightness_counter >= MAX_BRIGHTNESS) {
+    brightness_counter = 0;
+  }
 }
 
 // Delay tools to allows functions to execute then wait for the remainder of a delay

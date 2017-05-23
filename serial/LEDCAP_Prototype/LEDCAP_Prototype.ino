@@ -5,10 +5,10 @@
  // Use this if you want debug messages
 #define DEBUG 1
 // Use this to time each request handling
-#define TIMING 1
+//#define TIMING 1
 
 #ifdef DEBUG
-  #define DEBUG_PRINTLN(x) debugSerial.println(x)
+  #define DEBUG_PRINTLN(x) debugSerial.println(x); debugSerial.println()
   #define DEBUG_PRINT(x) debugSerial.print(x)
   #define DEBUG_PRINTDEC(x) debugSerial.print(x, DEC)
 #else
@@ -52,10 +52,7 @@ int sensorValues[8];
 
 void setup() { 
   int i;
-  for (i = 0; i < NUM_KEYS; i = i + 1) {
-    leds[i] = LED_OFF;
-  }
-  // Setup the debug serial
+  // Setup the debug serials
   debugSerial.begin(9600);
   DEBUG_PRINTLN("Debugging");
   Serial.begin(115200);
@@ -78,7 +75,7 @@ void setup() {
   } 
   */
   for(i=0; i<69; i++){
-    ledArray[i] = 1;
+    ledArray[i] = LED_OFF;
   } 
   
   PinSetup(); //Setup Teensy Pins
@@ -191,7 +188,7 @@ void GreenState(){
     if (ledArray[i] > 0){ //Count number of LEDS that are ON.
       ledsOn = ledsOn + 1;
     }
-    if (ledArray[i] == 1 || ledArray[i] == 3){
+    if (ledArray[i] == LED_GREEN || ledArray[i] == LED_ORANGE){
       digitalWrite(2, LOW);
       digitalWrite(3, HIGH);
     }
@@ -211,7 +208,7 @@ void RedState(){
   int i;
   digitalWrite(5, HIGH); //Disable Output for Shift registers
   for (i = 0; i<70; i++){
-    if (ledArray[i] == 2 || ledArray[i] == 3){
+    if (ledArray[i] == LED_RED || ledArray[i] == LED_ORANGE){
       digitalWrite(2, HIGH);
       digitalWrite(3, LOW);
       //Serial.write("test");
@@ -248,14 +245,14 @@ void updateSerial() {
     #endif
     // Read the next command
     res = Serial.read();
-    DEBUG_PRINTLN("Command code: ");
-    DEBUG_PRINTDEC(res);
-    DEBUG_PRINTLN();
+    //DEBUG_PRINTLN("Command code: ");
+    //DEBUG_PRINTDEC(res);
+    //DEBUG_PRINTLN();
     // Fork logic based on command
     if (res == CMD_LEDS) {
       DEBUG_PRINTLN("Reading key data");
       for (i = 0; i < NUM_KEYS; i = i + 1) {
-        leds[i] = Serial.read();
+        ledArray[i] = Serial.read();
       }
       DEBUG_PRINTLN("Done reading key data");
       Serial.write(ACK);
@@ -273,7 +270,7 @@ void updateSerial() {
       for (i = 0; i < NUM_CAPS; i = i + 1) {
         DEBUG_PRINTDEC(sensorValues[i]);
         DEBUG_PRINTLN();
-        Serial.write(map(sensorValues[i], 0, 1023, 0, 255));
+        Serial.write(map(sensorValues[i], 0, 65536, 0, 255));
       }
       Serial.write(ACK);
     }

@@ -16,6 +16,7 @@
 //// Serial Communication Parameters
 const byte CMD_LEDS = 1;
 const byte CMD_CAPS = 2;
+const byte CMD_INIT = 3;
 const byte ACK = 64;
 
 //// LED State Parameters
@@ -32,7 +33,7 @@ byte MAX_BRIGHTNESS = 8;
 
 //// Capacitive sensor parameters
 const byte NUM_CAPS = 8;
-int cap_pins[] = {23, 22, 19, 18, 17, 16, 15, 0};
+int cap_pins[] = {15, 18, 0, 16, 17, 19, 22, 23};
 const byte NUM_READINGS = 5;
 // Store the maximum of the most recent readings
 int cap_data[NUM_CAPS];
@@ -40,15 +41,18 @@ int cap_data[NUM_CAPS];
 int cap_readings[NUM_CAPS][NUM_READINGS];
 int cap_sensor_index = 0;
 int cap_reading_index = 0;
+const int DATA_CLAMP_VALUE = 65536;
 
 // Teensy hardware serial. RX: 0, TX: 1
-#define debugSerial Serial1
+#define debugSerial Serial2
 
 void setup() {
   // Set LED's initial state
   int i;
   for (i = 0; i < NUM_KEYS; i++) {
     leds[i] = LED_OFF;
+    if (i % 5 == 0)
+      leds[i] = LED_GREEN;
     led_brightness[i] = MAX_BRIGHTNESS;
   }
   // Initialize the GPIO pins
@@ -107,10 +111,12 @@ void updateSensorData() {
   // Get the next sensor reading
   cap_readings[cap_sensor_index][cap_reading_index] = touchRead(cap_pins[cap_sensor_index]);
   // Update the data array with the maximum value
+  int maxValue = 0;
   for (int i = 0; i < NUM_READINGS; i++) {
-    if (cap_readings[cap_sensor_index][i] > cap_data[cap_sensor_index])
-        cap_data[cap_sensor_index] = cap_readings[cap_sensor_index][i];
+    if (cap_readings[cap_sensor_index][i] > maxValue)
+        maxValue = cap_readings[cap_sensor_index][i];
   }
+  cap_data[cap_sensor_index] = maxValue;
   // Update the index variables for the next iteration
   cap_reading_index++;
   if (cap_reading_index >= NUM_READINGS) {
