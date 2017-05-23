@@ -3,7 +3,7 @@
 */
 
  // Use this if you want debug messages
-//#define DEBUG 1
+#define DEBUG 1
 // Use this to time each request handling
 #define TIMING 1
 
@@ -21,7 +21,7 @@ const byte CMD_LEDS = 1;
 const byte CMD_CAPS = 2;
 const byte ACK = 64;
 const byte NUM_KEYS = 70;
-const byte NUM_CAPS = 2;
+const byte NUM_CAPS = 8;
 
 const byte LED_OFF = 1;
 const byte LED_GREEN = 2;
@@ -62,7 +62,6 @@ void setup() {
   while (!Serial) {
     ;
   }
-  Serial.write(ACK);
   DEBUG_PRINTLN("Connected to client");               
 
   // TEST CODE FOR LED INITALIAZATION
@@ -272,11 +271,9 @@ void updateSerial() {
       DEBUG_PRINTLN("Sending sensor data");
       Serial.write(NUM_CAPS);
       for (i = 0; i < NUM_CAPS; i = i + 1) {
-        capValue = analogRead(cap_pins[i]);
-        DEBUG_PRINTDEC(capValue);
+        DEBUG_PRINTDEC(sensorValues[i]);
         DEBUG_PRINTLN();
-        // clamp the sensor value into a byte
-        Serial.write(map(capValue, 0, 1023, 0, 255));
+        Serial.write(map(sensorValues[i], 0, 1023, 0, 255));
       }
       Serial.write(ACK);
     }

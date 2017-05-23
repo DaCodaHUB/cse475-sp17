@@ -13,35 +13,29 @@
   #define DEBUG_PRINTDEC(x)
 #endif
 
-#ifdef TIMING
-  unsigned long stime;
-  #define TIMING_START(msg) stime = micros()
-  #define TIMING_STOP() stime = micros() - stime; debugSerial.println(stime)
-#else
-  #define TIMING_START()
-  #define TIMING_STOP()
-#endif
-
+//// Serial Communication Parameters
 const byte CMD_LEDS = 1;
 const byte CMD_CAPS = 2;
-const byte CMD_INIT = 3;
 const byte ACK = 64;
 
+//// LED State Parameters
 const byte LED_OFF = 1;
 const byte LED_GREEN = 2;
 const byte LED_RED = 3;
 const byte LED_ORANGE = 4;
-
 const byte NUM_KEYS = 70;
 byte leds[NUM_KEYS];
+// Brightness 
+byte led_brightness[NUM_KEYS];
+byte brightness_counter = 0;
+byte MAX_BRIGHTNESS = 8;
 
+//// Capacitive sensor parameters
 const byte NUM_CAPS = 8;
 int cap_pins[] = {23, 22, 19, 18, 17, 16, 15, 0};
 const byte NUM_READINGS = 5;
-
 // Store the maximum of the most recent readings
 int cap_data[NUM_CAPS];
-
 // 2D array to store intermediate reading results
 int cap_readings[NUM_CAPS][NUM_READINGS];
 int cap_sensor_index = 0;
@@ -51,10 +45,11 @@ int cap_reading_index = 0;
 #define debugSerial Serial1
 
 void setup() {
-  int i;
   // Set LED's initial state
+  int i;
   for (i = 0; i < NUM_KEYS; i++) {
     leds[i] = LED_OFF;
+    led_brightness[i] = MAX_BRIGHTNESS;
   }
   // Initialize the GPIO pins
   for (i = 1; i < 8; i++) {
@@ -77,15 +72,17 @@ void loop() {
   // Output Green state to shift registers
   updateLEDState(LED_GREEN);
   // Delay and read next sensor
-  beginDelay(5600);
+  beginDelay(700);
   updateSensorData();
   endDelay();
   // Output Red state to shift registers
   updateLEDState(LED_RED);
   // Delay and check for serial communication requests
-  beginDelay(4800);
+  beginDelay(600);
   updateSerial();
   endDelay();
+  // Increment the brightness counter to control PWM brightness
+  brightness_counter = (brightness_counter + 1) % MAX_BRIGHTNESS;
 }
 
 // Delay tools to allows functions to execute then wait for the remainder of a delay
@@ -135,7 +132,7 @@ void updateLEDState(byte flag) {
   }
   digitalWrite(5, HIGH); //Disable Output for Shift registers
   for (i = 0; i < NUM_KEYS; i++){
-    if (leds[i] == flag || leds[i] == LED_ORANGE){
+    if (led_brightness[i] > brightness_counter && (leds[i] == flag || leds[i] == LED_ORANGE)){
       digitalWrite(pin_low, LOW);
       digitalWrite(pin_high, HIGH);
     } else {
@@ -150,11 +147,17 @@ void updateLEDState(byte flag) {
   digitalWrite(5, LOW); //Enable Output for Shift registers
 }
 
+int i;
+unsigned long stime;
+
 // Checks serial communication and performs and sending or receiving the client requests
 void updateSerial() {
-  int i;
   byte res = 0;
   if (Serial.available() > 0) {
+    #ifdef TIMING
+      stime = micros();
+    #endif
+    
     // Read the next command
     res = Serial.read();
     DEBUG_PRINTLN("Command code: ");
@@ -163,7 +166,6 @@ void updateSerial() {
     
     // Fork logic based on command
     if (res == CMD_LEDS) {
-      TIMING_START();
       // Update LED array values
       DEBUG_PRINTLN("Reading key data");
       for (i = 0; i < NUM_KEYS; i++) {
@@ -180,7 +182,6 @@ void updateSerial() {
         }
         DEBUG_PRINTLN();
       #endif
-      TIMING_STOP();
     } else if (res == CMD_CAPS) {
       // Send sensor data
       DEBUG_PRINTLN("Sending sensor data");
@@ -192,12 +193,10 @@ void updateSerial() {
         Serial.write(map(cap_data[i], 0, 1023, 0, 255));
       }
       Serial.write(ACK);
-    } else if (res == CMD_INIT) {
-      // Reset LED state and send ACK byte
-      for (i = 0; i < NUM_KEYS; i++) {
-        leds[i] = LED_OFF;
-      }
-      Serial.write(ACK);
     }
+    #ifdef TIMING
+      stime = micros() - stime;
+      debugSerial.println(stime);
+    #endif
   }
 }
