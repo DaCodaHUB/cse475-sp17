@@ -47,8 +47,8 @@ int cap_readings[NUM_CAPS][NUM_READINGS];
 int cap_sensor_index = 0;
 int cap_reading_index = 0;
 
-// Teensy hardware serial. RX: 0, TX: 1
-#define debugSerial Serial1
+// Teensy hardware serial. RX: 9, TX: 10
+#define debugSerial Serial2
 
 void setup() {
   int i;
@@ -77,9 +77,11 @@ void loop() {
   // Output Green state to shift registers
   updateLEDState(LED_GREEN);
   // Delay and read next sensor
+  TIMING_START();
   beginDelay(5600);
   updateSensorData();
   endDelay();
+  TIMING_STOP();
   // Output Red state to shift registers
   updateLEDState(LED_RED);
   // Delay and check for serial communication requests

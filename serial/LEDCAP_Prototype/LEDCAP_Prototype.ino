@@ -33,8 +33,8 @@ byte leds[NUM_KEYS];
 int cap_pins[] = {4, 5};
 
 
-// Teensy hardware serial. RX: 0, TX: 1
-#define debugSerial Serial1
+// Teensy hardware serial. RX: 9, TX: 10
+#define debugSerial Serial2
 
 // Global Variables
 int ledArray[69];
