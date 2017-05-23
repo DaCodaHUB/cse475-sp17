@@ -116,14 +116,24 @@ void updateSensorData() {
 // Updates the shift registers for an LED color based on the given flag
 void updateLEDState(byte flag) {
   int i;
+  int pin_low, pin_high;
+  if (flag == LED_GREEN) {
+    pin_low = 2;
+    pin_high = 3;
+    flag = LED_GREEN;
+  } else {
+    pin_low = 3;
+    pin_high = 2;
+    flag = LED_RED:
+  }
   digitalWrite(5, HIGH); //Disable Output for Shift registers
   for (i = 0; i < NUM_KEYS; i++){
     if (leds[i] == flag || leds[i] == LED_ORANGE){
-      digitalWrite(2, LOW);
-      digitalWrite(3, HIGH);
+      digitalWrite(pin_low, LOW);
+      digitalWrite(pin_high, HIGH);
     } else {
-      digitalWrite(2, LOW);
-      digitalWrite(3, LOW);
+      digitalWrite(pin_low, LOW);
+      digitalWrite(pin_high, LOW);
     }
     digitalWrite(4, LOW);
     __asm__("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t"); 
