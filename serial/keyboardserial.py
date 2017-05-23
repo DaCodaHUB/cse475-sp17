@@ -1,11 +1,17 @@
 import serial
 
 ## Keyboard information
-KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
+KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS', 'ARROW_LEFT', 
+        '\\', 'BACKSPACE', 'ENTER', 'SHIFT_RIGHT', 'CTRL_RIGHT', ']', '=', '"', '[',
+        'ALT_RIGHT', '/', '-', ';', 'p', '.', 'FN', '0', 'l', 'o', ',', '9', 'k', 'i', 'SPACE_RIGHT',
+        'm', '8', 'j', 'u', 'n', '7', 'h', 'y', 'b', '6', 'g', 't', 'v', '5', 'f', 'SPACE_LEFT',
+        'r', 'c', '4', 'd', 'e', 'x', '3', 's', 'ALT_LEFT', 'w', 'z', '2', 'a', 'q', 'WIN', '1', 'CTRL_LEFT',
+        'SHIFT_LEFT', 'CAPSLOCK', 'TAB', 'ESC']
 
 ## Command codes for the keyboard
 CMD_LEDS = 1    # update the state of the leds
 CMD_CAPS = 2    # retrieve the capacative sensor data
+CMD_INIT = 3    # initiate a connection with the teensy
 ACK = 64
 
 ## LED state values
@@ -34,9 +40,6 @@ class KeyboardSerial:
             self.ser = serial.Serial(port, baudrate=BAUD)
         except serial.SerialException:
             print("Failed to connect to port " + port)
-            return False
-        # Wait for initial ACK to verify serial init
-        if self.ser.read() != bytes([ACK]):
             return False
         return True
 

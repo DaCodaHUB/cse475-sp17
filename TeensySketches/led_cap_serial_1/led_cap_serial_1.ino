@@ -61,9 +61,6 @@ void setup() {
   while (!Serial) {
     ;
   }
-  // Connect to client
-  Serial.write(ACK);
-  DEBUG_PRINTLN("Connected to client");
 }
 
 
