@@ -1,7 +1,7 @@
 '''
 	Adapted from https://github.com/NoOutlet/ToddlerType
 
-	To get started, just run "python typing.py". You can then press any key on the title screen to get to the words.
+	To get started, just run "python typing.py SERIAL_PORT". You can then press any key on the title screen to get to the words.
 	Use the up/down arrow keys to change the level and difficulty of the words.
 	The program uses a SQLite database which is included. Also included are a json and a csv of the words.
 	
@@ -20,6 +20,7 @@ import os
 import threading
 import time
 from pygame.locals import *
+from keyboardserial import KeyboardSerial
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/words.db")
@@ -40,6 +41,16 @@ TEXTHIGHLIGHT = LIGHTBLUE
 
 def main():
     global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
+
+    ks = KeyboardSerial()
+
+    print("Connecting to serial port on " + sys.argv[1])
+    ks.connect(sys.argv[1])
+    if ks.is_connected():
+        print("Successfully connected")
+    else:
+        terminate()
+
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
@@ -79,6 +90,7 @@ def main():
             pygame.display.update()
             #pygame.time.wait(1000)
     connection.close()
+    ks.disconnect()
 
 
 def make_text_objs(text, font, fontcolor):
@@ -120,6 +132,7 @@ def show_word(word):
     while typed != text:
         next_letter = to_type[0]
         print "light up letter: {}".format(next_letter)
+        ks.update_leds({next_letter : 2})
 
         pygame.event.clear()
         while True:
