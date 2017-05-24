@@ -5,6 +5,8 @@
 	Use the up/down arrow keys to change the level and difficulty of the words.
 	The program uses a SQLite database which is included. Also included are a json and a csv of the words.
 	
+	An example of a serial port is: '/dev/ttyS1' or 'COM3' or '/dev/ttyUSB0'
+	
 	Dependencies
 	============
 	* Python 2.7
