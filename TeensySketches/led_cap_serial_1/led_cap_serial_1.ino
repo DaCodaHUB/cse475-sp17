@@ -52,6 +52,9 @@ int cap_reading_index = 0;
 // Teensy hardware serial. RX: 9, TX: 10
 #define debugSerial Serial2
 
+//LEDs that are on counter
+int ledsOn = 0;
+
 void setup() {
   int i;
   // Set LED's initial state
@@ -81,12 +84,15 @@ void loop() {
   beginDelay(5600);
   updateSensorData();
   endDelay();
+  DutyCycleAdjust();
+  
   // Output Red state to shift registers
   updateLEDState(LED_RED);
   // Delay and check for serial communication requests
   beginDelay(4800);
   updateSerial();
   endDelay();
+  DutyCycleAdjust();
 }
 
 // Delay tools to allows functions to execute then wait for the remainder of a delay
@@ -201,4 +207,11 @@ void updateSerial() {
       Serial.write(ACK);
     }
   }
+}
+
+void DutyCycleAdjust(){ //Decreases the effective duty cycle to prohibit damaging LEDS or drawing to much current.
+//    if (ledsOn > 10){
+//    digitalWrite(5, HIGH); //Disable Output for Shift registers
+//    //delayMicroseconds(ledsOn*10); //Wait After Red State is set
+//  }
 }
