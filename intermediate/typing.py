@@ -22,6 +22,7 @@ import os
 import threading
 import time
 from pygame.locals import *
+from ser.keyboardserial import KeyboardSerial
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/sentences.db")
@@ -35,6 +36,8 @@ GRAY = (180, 180, 180)
 BLACK = (0, 0, 0)
 LIGHTBLUE = (20, 20, 175)
 
+ks = KeyboardSerial()
+
 BGCOLOR = BLACK
 TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
@@ -47,6 +50,15 @@ Uppercase = str.maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
 
 def main():
     global DISPLAYSURF, BIGFONT, BIGFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, CHARS, SENTENCES, WORDS_PER_MIN
+
+    print("Connecting to serial port on " + sys.argv[1])
+    ks.connect(sys.argv[1])
+    if ks.is_connected():
+        print("Successfully connected")
+    else:
+        print("Could not connect")
+        terminate()
+
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
 
@@ -131,6 +143,7 @@ def show_sentence(word):
 
     while typed != text:
         next_letter = to_type[0]
+        ks.update_leds({next_letter.lower(): 2})
         print("light up letter: '{}'".format(next_letter))
 
         pygame.event.clear()
@@ -138,11 +151,13 @@ def show_sentence(word):
             pygame.display.update()
             event = pygame.event.wait()
             if event.type == QUIT:
+                ks.update_leds({next_letter.lower(): 0})
                 terminate()
             elif event.type == KEYDOWN and (event.key == K_RSHIFT or event.key == K_LSHIFT):
                 SHIFTED = True
             elif event.type == KEYUP and event.key > 0:
                 if event.key == K_ESCAPE:
+                    ks.update_leds({next_letter.lower(): 0})
                     terminate()
                 elif event.key == K_RSHIFT or event.key == K_LSHIFT:
                     SHIFTED = False
@@ -186,6 +201,7 @@ def show_sentence(word):
                     DISPLAYSURF.blit(error_surf, error_rect)
 
         CHARS += 1
+        ks.update_leds({next_letter.lower(): 0})
         to_type = to_type[1:]
         typed = typed + next_letter
         typed_surf, typed_rect = make_text_objs(typed, BIGFONT, TEXTHIGHLIGHT)
