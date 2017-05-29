@@ -99,6 +99,7 @@ def main():
 
             pygame.display.update()
     connection.close()
+    ks.disconnect()
 
 
 def make_text_objs(text, font, fontcolor):
