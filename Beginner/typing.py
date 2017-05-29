@@ -41,10 +41,11 @@ TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 
+ks = KeyboardSerial()
+    
 def main():
     global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
 
-    ks = KeyboardSerial()
 
     print("Connecting to serial port on " + sys.argv[1])
     ks.connect(sys.argv[1])
@@ -133,7 +134,7 @@ def show_word(word):
 
     while typed != text:
         next_letter = to_type[0]
-        print "light up letter: {}".format(next_letter)
+        print("light up letter: {}".format(next_letter))
         ks.update_leds({next_letter : 2})
 
         pygame.event.clear()

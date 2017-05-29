@@ -22,7 +22,6 @@ import os
 import threading
 import time
 from pygame.locals import *
-from string import maketrans
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/sentences.db")
@@ -43,7 +42,7 @@ TEXTHIGHLIGHT = LIGHTBLUE
 SHIFTED = False
 FIRST = True
 
-Uppercase = maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
+Uppercase = str.maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
 
 def main():
@@ -132,7 +131,7 @@ def show_sentence(word):
 
     while typed != text:
         next_letter = to_type[0]
-        print "light up letter: '{}'".format(next_letter)
+        print("light up letter: '{}'".format(next_letter))
 
         pygame.event.clear()
         while True:
@@ -174,7 +173,7 @@ def show_sentence(word):
                     if(charac == next_letter):
                         break
 
-                    print "Expected: {} Typed: {}".format(next_letter, charac)
+                    print("Expected: {} Typed: {}".format(next_letter, charac))
 
                     ERROR_SOUND.play()
                     ERRORS += 1
