@@ -22,7 +22,7 @@ import os
 import threading
 import time
 from pygame.locals import *
-from keyboardserial import KeyboardSerial
+from ser.keyboardserial import KeyboardSerial
 
 basepath = os.path.dirname(os.path.abspath(__file__))
 connection = sqlite3.connect(basepath + "/words.db")
@@ -46,12 +46,12 @@ ks = KeyboardSerial()
 def main():
     global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN
 
-
     print("Connecting to serial port on " + sys.argv[1])
     ks.connect(sys.argv[1])
     if ks.is_connected():
         print("Successfully connected")
     else:
+        print("Could not connect")
         terminate()
 
     pygame.init()
@@ -142,9 +142,11 @@ def show_word(word):
             pygame.display.update()
             event = pygame.event.wait()
             if event.type == QUIT:
+                ks.update_leds({next_letter: 0})
                 terminate()
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
+                    ks.update_leds({next_letter: 0})
                     terminate()
                 elif pygame.key.name(event.key) == next_letter:
                     break
@@ -190,7 +192,7 @@ def show_word(word):
                     word_level_rect.topright = (WINDOWWIDTH - 10, 10)
                     DISPLAYSURF.blit(word_level_surf, word_level_rect)
                 '''
-
+        ks.update_leds({next_letter: 0})
         to_type = to_type[1:]
         typed = typed + next_letter
         typed_surf, typed_rect = make_text_objs(typed.upper(), BIGFONT, TEXTHIGHLIGHT)
