@@ -1,6 +1,8 @@
 import sys, time
 from ser.keyboardserial import KeyboardSerial
 
+# python light_keys.py "`cat input.txt`"
+
 
 def light(char, state):
 	if (char == ' '):
@@ -11,8 +13,8 @@ def light(char, state):
 		ks.update_leds({key: state})
 
 
-
-TARGET = "the quick brown fox jumped over the lazy dog"
+TARGET = sys.argv[1]
+#TARGET = "the quick brown fox jumped over the lazy dog"
 
 ks = KeyboardSerial()
 

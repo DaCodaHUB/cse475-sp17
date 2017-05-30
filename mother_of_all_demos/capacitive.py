@@ -8,7 +8,7 @@ if ks.is_connected():
     print("Successfully connected")
 		
 def threshhold(x):
-    if x > 15:
+    if x > 13:
         return 2
     return 1
 
