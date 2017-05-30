@@ -1,13 +1,6 @@
 from ser.keyboardserial import KeyboardSerial
 import sys, time
 
-KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS', 'ARROW_LEFT',
-        '\\', 'BACKSPACE', 'ENTER', 'SHIFT_RIGHT', 'CTRL_RIGHT', ']', '=', '"', '[',
-        'ALT_RIGHT', '/', '-', ';', 'p', '.', 'FN', '0', 'l', 'o', ',', '9', 'k', 'i', 'SPACE_RIGHT',
-        'm', '8', 'j', 'u', 'n', '7', 'h', 'y', 'b', '6', 'g', 't', 'v', '5', 'f', 'SPACE_LEFT',
-        'r', 'c', '4', 'd', 'e', 'x', '3', 's', 'ALT_LEFT', 'w', 'z', '2', 'a', 'q', 'WIN', '1', 'CTRL_LEFT',
-        'SHIFT_LEFT', 'CAPSLOCK', 'TAB', 'ESC']
-
 ks = KeyboardSerial()
 
 RED = 3
@@ -28,14 +21,14 @@ def manual_snake():
         option = int(input("Enter option: "))
 
 def snake(state, seconds, dir = 0):
-    delay = seconds / len(KEYS)
+    delay = seconds / len(ks.KEYS)
     if (dir == 0):
-        for i in range(len(KEYS)):
-            ks.update_leds({KEYS[i] : state})
+        for i in range(len(ks.KEYS)):
+            ks.update_leds({ks.KEYS[i] : state})
             time.sleep(delay)
     else:
-        for i in range(len(KEYS)-1, 0, -1):
-            ks.update_leds({KEYS[i]: state})
+        for i in range(len(ks.KEYS)-1, 0, -1):
+            ks.update_leds({ks.KEYS[i]: state})
             time.sleep(delay)
 
 def main():
