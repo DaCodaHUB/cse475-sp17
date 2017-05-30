@@ -3,15 +3,21 @@ from keyboardserial import KeyboardSerial
 
 ks = KeyboardSerial()
 
-print("Connecting to serial port on " + sys.argv[1])
-ks.connect(sys.argv[1])
+ks.autoconnect()
 if ks.is_connected():
     print("Successfully connected")
 		
+def threshhold(x):
+    if x > 15:
+        return 2
+    return 1
+
+oldData = {}
 while True:
-	data = ks.get_sensor_data()
-	# DO DATA PROCESSING
-	ks.update_leds({'a': data[0], 's': data[1], 'd': data[2], 'f': data[3], 'j': data[4], 'k': data[5], 'l': data[6], ';': data[7]})
-	time.sleep(0.05)
+    data = ks.get_sensor_data()
+    # DO DATA PROCESSING
+    data = list(map(threshhold, data))
+    ks.update_leds({'a': data[5], 's': data[1], 'd': data[4], 'f': data[3], 'j': data[0], 'k': data[2], 'l': data[7], ';': data[6]})
+    time.sleep(0.01)
 	
 ks.disconnect()

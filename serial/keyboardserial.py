@@ -8,6 +8,10 @@ KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS',
         'r', 'c', '4', 'd', 'e', 'x', '3', 's', 'ALT_LEFT', 'w', 'z', '2', 'a', 'q', 'WIN', '1', 'CTRL_LEFT',
         'SHIFT_LEFT', 'CAPSLOCK', 'TAB', 'ESC']
 
+## Teensy Vendor ID and Product ID
+VID = "16C0"
+PID = "0483"
+
 ## Command codes for the keyboard
 CMD_LEDS = 1    # update the state of the leds
 CMD_CAPS = 2    # retrieve the capacative sensor data
@@ -42,6 +46,22 @@ class KeyboardSerial:
             print("Failed to connect to port " + port)
             return False
         return True
+
+    # Connect to the teensy automatically
+    def autoconnect(self):
+        # Close any old connections
+        if self.ser is not None:
+            if self.ser.is_open:
+                self.ser.close()
+        # Opens a serial port with a 1s timeout
+        try:
+            self.ser = serial.serial_for_url("hwgrep://" + VID + ":" + PID)
+        except serial.SerialException:
+            print("Failed to connect")
+            return False
+        return True
+
+        
 
     def disconnect(self):
         if self.is_connected():
