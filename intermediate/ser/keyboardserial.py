@@ -1,6 +1,9 @@
 import serial
 
 
+## Teensy Vendor ID and Product ID
+VID = "16C0"
+PID = "0483"
 
 ## Command codes for the keyboard
 CMD_LEDS = 1    # update the state of the leds
@@ -17,7 +20,7 @@ LED_ORANGE = 4
 BAUD = 115200
 
 class KeyboardSerial:
-    ## Keyboard information
+	## Keyboard information
     KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS', 'ARROW_LEFT',
             '\\', 'BACKSPACE', 'ENTER', 'SHIFT_RIGHT', 'CTRL_RIGHT', ']', '=', '"', '[',
             'ALT_RIGHT', '/', '-', ';', 'p', '.', 'FN', '0', 'l', 'o', ',', '9', 'k', 'i', 'SPACE_RIGHT',
@@ -49,6 +52,22 @@ class KeyboardSerial:
             return False
         return True
 
+    # Connect to the teensy automatically
+    def autoconnect(self):
+        # Close any old connections
+        if self.ser is not None:
+            if self.ser.is_open:
+                self.ser.close()
+        # Opens a serial port with a 1s timeout
+        try:
+            self.ser = serial.serial_for_url("hwgrep://" + VID + ":" + PID)
+        except serial.SerialException:
+            print("Failed to connect")
+            return False
+        return True
+
+        
+
     def disconnect(self):
         if self.is_connected():
             self.ser.close()
@@ -79,7 +98,7 @@ class KeyboardSerial:
             if key in led_states:
                 self.key_states[i] = led_states[key]
         # Send the sequence of states
-        # print("Sending state sequence of length " + str(len(KEYS)))
+        # print("Sending state sequence of length " + str(len(self.KEYS)))
         for state in self.key_states:
             commands.append(state)
         self.sendAll(commands)

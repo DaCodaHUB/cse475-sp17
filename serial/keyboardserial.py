@@ -1,12 +1,5 @@
 import serial
 
-## Keyboard information
-KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS', 'ARROW_LEFT', 
-        '\\', 'BACKSPACE', 'ENTER', 'SHIFT_RIGHT', 'CTRL_RIGHT', ']', '=', '"', '[',
-        'ALT_RIGHT', '/', '-', ';', 'p', '.', 'FN', '0', 'l', 'o', ',', '9', 'k', 'i', 'SPACE_RIGHT',
-        'm', '8', 'j', 'u', 'n', '7', 'h', 'y', 'b', '6', 'g', 't', 'v', '5', 'f', 'SPACE_LEFT',
-        'r', 'c', '4', 'd', 'e', 'x', '3', 's', 'ALT_LEFT', 'w', 'z', '2', 'a', 'q', 'WIN', '1', 'CTRL_LEFT',
-        'SHIFT_LEFT', 'CAPSLOCK', 'TAB', 'ESC']
 
 ## Teensy Vendor ID and Product ID
 VID = "16C0"
@@ -27,8 +20,20 @@ LED_ORANGE = 4
 BAUD = 115200
 
 class KeyboardSerial:
+	## Keyboard information
+    KEYS = ['ARROW_RIGHT', 'PG_DN', 'PG_UP', 'ARROW_DOWN', 'ARROW_UP', 'DEL', 'INS', 'ARROW_LEFT',
+            '\\', 'BACKSPACE', 'ENTER', 'SHIFT_RIGHT', 'CTRL_RIGHT', ']', '=', '"', '[',
+            'ALT_RIGHT', '/', '-', ';', 'p', '.', 'FN', '0', 'l', 'o', ',', '9', 'k', 'i', 'SPACE_RIGHT',
+            'm', '8', 'j', 'u', 'n', '7', 'h', 'y', 'b', '6', 'g', 't', 'v', '5', 'f', 'SPACE_LEFT',
+            'r', 'c', '4', 'd', 'e', 'x', '3', 's', 'ALT_LEFT', 'w', 'z', '2', 'a', 'q', 'WIN', '1', 'CTRL_LEFT',
+            'SHIFT_LEFT', 'CAPSLOCK', 'TAB', 'ESC']
+    CHAR_MAP = {'\\': 8, ']': 13, '=': 14, '"': 15, '[': 16, '/': 18, '-': 19, ';': 20, 'p': 21, '.': 22, 'FN': 23, '0': 24,
+            'l': 25, 'o': 26, ',': 27, '9': 28, 'k': 29, 'i': 30, 'm': 32, '8': 33, 'j': 34, 'u': 35, 'n': 36, '7': 37,
+            'h': 38, 'y': 39, 'b': 40, '6': 41, 'g': 42, 't': 43, 'v': 44, '5': 45, 'f': 46, 'r': 48, 'c': 49, '4': 50,
+            'd': 51, 'e': 52, 'x': 53, '3': 54, 's': 55, 'w': 57, 'z': 58, '2': 59, 'a': 60, 'q': 61, '1': 63}
+
     def __init__(self):
-        self.key_states = [LED_OFF for led in range(len(KEYS))]
+        self.key_states = [LED_OFF for led in range(len(self.KEYS))]
         self.ser = None
 
     def is_connected(self):
@@ -89,11 +94,11 @@ class KeyboardSerial:
         # Write the command code and number of k,v pairs
         commands = [CMD_LEDS]
         # Update the internal key array
-        for i, key in enumerate(KEYS):
+        for i, key in enumerate(self.KEYS):
             if key in led_states:
                 self.key_states[i] = led_states[key]
         # Send the sequence of states
-        # print("Sending state sequence of length " + str(len(KEYS)))
+        # print("Sending state sequence of length " + str(len(self.KEYS)))
         for state in self.key_states:
             commands.append(state)
         self.sendAll(commands)
