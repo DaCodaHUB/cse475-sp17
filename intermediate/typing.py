@@ -144,7 +144,13 @@ def show_sentence(word):
 
     while typed != text:
         next_letter = to_type[0]
-        ks.update_leds({next_letter.lower(): 2})
+        if (next_letter == ' '):
+            ks.update_leds({'SPACE_LEFT': 2})
+            ks.update_leds({'SPACE_RIGHT': 2})
+        else:
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+            ks.update_leds({key : 2})
+            # ks.update_leds({next_letter.lower(): 2})
         print("light up letter: '{}'".format(next_letter))
 
         pygame.event.clear()
@@ -152,13 +158,23 @@ def show_sentence(word):
             pygame.display.update()
             event = pygame.event.wait()
             if event.type == QUIT:
-                ks.update_leds({next_letter.lower(): 0})
+                if (next_letter == ' '):
+                    ks.update_leds({'SPACE_LEFT': 0})
+                    ks.update_leds({'SPACE_RIGHT': 0})
+                else:
+                    key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+                    ks.update_leds({key: 0})
                 terminate()
             elif event.type == KEYDOWN and (event.key == K_RSHIFT or event.key == K_LSHIFT):
                 SHIFTED = True
             elif event.type == KEYUP and event.key > 0:
                 if event.key == K_ESCAPE:
-                    ks.update_leds({next_letter.lower(): 0})
+                    if (next_letter == ' '):
+                        ks.update_leds({'SPACE_LEFT': 0})
+                        ks.update_leds({'SPACE_RIGHT': 0})
+                    else:
+                        key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+                        ks.update_leds({key: 0})
                     terminate()
                 elif event.key == K_RSHIFT or event.key == K_LSHIFT:
                     SHIFTED = False
@@ -202,7 +218,12 @@ def show_sentence(word):
                     DISPLAYSURF.blit(error_surf, error_rect)
 
         CHARS += 1
-        ks.update_leds({next_letter.lower(): 0})
+        if (next_letter == ' '):
+            ks.update_leds({'SPACE_LEFT': 0})
+            ks.update_leds({'SPACE_RIGHT': 0})
+        else:
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+            ks.update_leds({key: 0})
         to_type = to_type[1:]
         typed = typed + next_letter
         typed_surf, typed_rect = make_text_objs(typed, BIGFONT, TEXTHIGHLIGHT)
