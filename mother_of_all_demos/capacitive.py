@@ -1,5 +1,5 @@
 import sys, time
-from keyboardserial import KeyboardSerial
+from ser.keyboardserial import KeyboardSerial
 
 ks = KeyboardSerial()
 
