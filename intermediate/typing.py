@@ -148,7 +148,7 @@ def show_sentence(word):
             ks.update_leds({'SPACE_LEFT': 2})
             ks.update_leds({'SPACE_RIGHT': 2})
         else:
-            key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]#error on '!'
             ks.update_leds({key : 2})
             # ks.update_leds({next_letter.lower(): 2})
         print("light up letter: '{}'".format(next_letter))
@@ -162,7 +162,7 @@ def show_sentence(word):
                     ks.update_leds({'SPACE_LEFT': 0})
                     ks.update_leds({'SPACE_RIGHT': 0})
                 else:
-                    key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+                    key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
                     ks.update_leds({key: 0})
                 terminate()
             elif event.type == KEYDOWN and (event.key == K_RSHIFT or event.key == K_LSHIFT):
@@ -173,7 +173,7 @@ def show_sentence(word):
                         ks.update_leds({'SPACE_LEFT': 0})
                         ks.update_leds({'SPACE_RIGHT': 0})
                     else:
-                        key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+                        key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
                         ks.update_leds({key: 0})
                     terminate()
                 elif event.key == K_RSHIFT or event.key == K_LSHIFT:
@@ -222,7 +222,7 @@ def show_sentence(word):
             ks.update_leds({'SPACE_LEFT': 0})
             ks.update_leds({'SPACE_RIGHT': 0})
         else:
-            key = KeyboardSerial.KEYS[KeyboardSerial.CHARMAP[next_letter.lower()]]
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
             ks.update_leds({key: 0})
         to_type = to_type[1:]
         typed = typed + next_letter

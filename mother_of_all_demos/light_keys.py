@@ -1,5 +1,5 @@
 import sys, time
-from keyboardserial import KeyboardSerial
+from ser.keyboardserial import KeyboardSerial
 
 
 TARGET = "the quick brown fox jumped over the lazy dog"
