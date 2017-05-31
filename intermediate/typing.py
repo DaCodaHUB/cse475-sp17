@@ -45,19 +45,21 @@ TEXTHIGHLIGHT = LIGHTBLUE
 SHIFTED = False
 FIRST = True
 
-Uppercase = str.maketrans("abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./",
-                      'ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:"<>?')
+STR_UPPER = "abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./"
+STR_LOWER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:\"<>?"
+Uppercase = str.maketrans(STR_UPPER, STR_LOWER)
+Lowercase = str.maketrans(STR_LOWER, STR_UPPER)
 
 def main():
     global DISPLAYSURF, BIGFONT, BIGFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, CHARS, SENTENCES, WORDS_PER_MIN
 
-    print("Connecting to serial port on " + sys.argv[1])
-    ks.connect(sys.argv[1])
-    if ks.is_connected():
-        print("Successfully connected")
-    else:
-        print("Could not connect")
-        terminate()
+    # print("Connecting to serial port on " + sys.argv[1])
+    # ks.connect(sys.argv[1])
+    # if ks.is_connected():
+        # print("Successfully connected")
+    # else:
+        # print("Could not connect")
+        # terminate()
 
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound("error.wav")
@@ -148,7 +150,7 @@ def show_sentence(word):
             ks.update_leds({'SPACE_LEFT': 2})
             ks.update_leds({'SPACE_RIGHT': 2})
         else:
-            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]#error on '!'
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.translate(Lowercase)]]#error on '!'
             ks.update_leds({key : 2})
             # ks.update_leds({next_letter.lower(): 2})
         print("light up letter: '{}'".format(next_letter))
@@ -162,22 +164,22 @@ def show_sentence(word):
                     ks.update_leds({'SPACE_LEFT': 0})
                     ks.update_leds({'SPACE_RIGHT': 0})
                 else:
-                    key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
+                    key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.translate(Lowercase)]]
                     ks.update_leds({key: 0})
                 terminate()
             elif event.type == KEYDOWN and (event.key == K_RSHIFT or event.key == K_LSHIFT):
                 SHIFTED = True
-            elif event.type == KEYUP and event.key > 0:
+            elif event.type == KEYUP and (event.key == K_RSHIFT or event.key == K_LSHIFT):
+                SHIFTED = False
+            elif event.type == KEYDOWN and event.key > 0:
                 if event.key == K_ESCAPE:
                     if (next_letter == ' '):
                         ks.update_leds({'SPACE_LEFT': 0})
                         ks.update_leds({'SPACE_RIGHT': 0})
                     else:
-                        key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
+                        key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.translate(Lowercase)]]
                         ks.update_leds({key: 0})
                     terminate()
-                elif event.key == K_RSHIFT or event.key == K_LSHIFT:
-                    SHIFTED = False
                 elif event.key == K_UP: # up a level
                     LEVEL = min(4, LEVEL + 1)
                     level_surf, level_rect = make_text_objs('LevelXX: ' + str(LEVEL), SMALLFONT, TEXTCOLOR)
@@ -222,7 +224,7 @@ def show_sentence(word):
             ks.update_leds({'SPACE_LEFT': 0})
             ks.update_leds({'SPACE_RIGHT': 0})
         else:
-            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.lower()]]
+            key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[next_letter.translate(Lowercase)]]
             ks.update_leds({key: 0})
         to_type = to_type[1:]
         typed = typed + next_letter
