@@ -27,7 +27,7 @@ for c in TARGET.lower():
 	light(last, 1)
 	light(c, 2)
 	last = c
-	time.sleep(1)
+	time.sleep(.2)
 
 light(last, 1)
 ks.disconnect()

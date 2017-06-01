@@ -61,7 +61,7 @@ Lowercase = str.maketrans(STR_LOWER, STR_UPPER)
 
 # map from key character to sensor array index
 KEY_CAP_MAP = {'a': 5, 's': 1, 'd': 4, 'f': 3, 'j': 0, 'k': 2, 'l': 7, ';': 6}
-CAP_THRESHOLD = 15
+CAP_THRESHOLD = 11
 # Which keys should be pressed by which fingers
 KEYS_LEFT = "asdf"
 KEYS_RIGHT = "jkl;"
@@ -77,8 +77,8 @@ KEY_CORRECT = ''
 HOMEROW_INCORRECT = False
 # How long each key has been left untouched
 KEY_CAP_TIMERS = {'a': 0, 's': 0, 'd': 0, 'f': 0, 'j': 0, 'k': 0, 'l': 0, ';': 0}
-MAX_RELEASE_SAME_SIDE = 30
-MAX_RELEASE_OTHER_SIDE = 15
+MAX_RELEASE_SAME_SIDE = 60
+MAX_RELEASE_OTHER_SIDE = 30
 
 # Sentence progress
 SENTENCE = ""
@@ -105,8 +105,8 @@ def main():
     pygame.event.set_allowed(None)
     pygame.event.set_allowed([KEYUP, KEYDOWN, QUIT])
     clock = pygame.time.Clock()
-    # DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT], pygame.FULLSCREEN)
-    DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT])
+    DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT], pygame.FULLSCREEN)
+    #DISPLAYSURF = pygame.display.set_mode([WINDOWWIDTH, WINDOWHEIGHT])
     LEVEL = 0
     ERRORS = 0
     WORDS = 0
