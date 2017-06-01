@@ -38,6 +38,7 @@ class KeyboardSerial:
         self.ser = None
 
     def is_connected(self):
+        return True
         return self.ser is not None and self.ser.is_open
 
     def connect(self, port):
@@ -71,7 +72,8 @@ class KeyboardSerial:
 
     def disconnect(self):
         if self.is_connected():
-            self.ser.close()
+            # self.ser.close()
+            print("Clsoed")
 
     # Sends a byte over serial and waits for ACK byte
     def send(self, byte):

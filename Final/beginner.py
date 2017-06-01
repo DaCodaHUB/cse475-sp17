@@ -144,12 +144,12 @@ def show_word(word):
             event = pygame.event.wait()
             if event.type == QUIT:
                 ks.update_leds({next_letter: 0})
-                RUNNING = False
+                terminate()
                 return
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
                     ks.update_leds({next_letter: 0})
-                    RUNNING = False
+                    terminate()
                     return
                 elif pygame.key.name(event.key) == next_letter:
                     break
@@ -215,10 +215,10 @@ def show_title_screen(text):
 
 # runs in separate thread and shows the time on the screen
 def update_timer(start):
-    global DISPLAYSURF, WORDS, WORDS_PER_MIN
-    t = threading.Timer(.1, update_timer, (start,))
-    t.daemon = True
-    t.start()
+    global DISPLAYSURF, WORDS, WORDS_PER_MIN, TIMER_THREAD
+    TIMER_THREAD = threading.Timer(.1, update_timer, (start,))
+    TIMER_THREAD.daemon = True
+    TIMER_THREAD.start()
     #print "TIME: {}".format(time.time() - start)
     difference = int(time.time() - start)
     time_surf, time_rect = make_text_objs('TimeXX: ' + str(difference), SMALLFONT, TEXTCOLOR)
@@ -243,7 +243,9 @@ def update_timer(start):
 
 
 def terminate():
-    global RUNNING
+    global RUNNING, TIMER_THREAD
+    # Kill the silly timer
+    TIMER_THREAD.cancel()
     RUNNING = False
 
 
