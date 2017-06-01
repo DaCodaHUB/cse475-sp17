@@ -1,5 +1,6 @@
 import sys, time
 import pygame
+from pygame.locals import *
 from ser.keyboardserial import KeyboardSerial
 
 WINDOWWIDTH = 1024
@@ -20,6 +21,7 @@ TEXTHIGHLIGHT = LIGHTBLUE
 TEXTGUIDE = GREEN
 
 def main():
+    global DISPLAYSURF, SMALLFONT, BIGFONT
     ks = KeyboardSerial()
 
     ks.autoconnect()
@@ -59,12 +61,18 @@ def main():
     ks.disconnect()
 
 
+def make_text_objs(text, font, fontcolor):
+    surf = font.render(text, True, fontcolor)
+    return surf, surf.get_rect()
+
+
 def show_title_screen(text):
-    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 90), TEXTSHADOWCOLOR)
+    global DISPLAYSURF, SMALLFONT, BIGFONT
+    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 60), TEXTSHADOWCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2), int(WINDOWHEIGHT / 2))
     DISPLAYSURF.blit(title_surf, title_rect)
 
-    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 90), TEXTCOLOR)
+    title_surf, title_rect = make_text_objs(text, pygame.font.Font('freesansbold.ttf', 60), TEXTCOLOR)
     title_rect.center = (int(WINDOWWIDTH / 2) - 2, int(WINDOWHEIGHT / 2) - 2)
     DISPLAYSURF.blit(title_surf, title_rect)
 

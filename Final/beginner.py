@@ -74,7 +74,7 @@ def main():
     show_title_screen(TITLE)
     pygame.event.clear()
     pygame.event.wait()
-    update_timer(time.time())
+    # update_timer(time.time())
 
     while RUNNING:
         CUR = connection.cursor()
@@ -245,7 +245,6 @@ def update_timer(start):
 def terminate():
     global RUNNING, TIMER_THREAD
     # Kill the silly timer
-    TIMER_THREAD.cancel()
     RUNNING = False
 
 

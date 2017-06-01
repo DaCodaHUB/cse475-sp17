@@ -20,12 +20,16 @@ TEXTSHADOWCOLOR = GRAY
 TEXTHIGHLIGHT = LIGHTBLUE
 TEXTGUIDE = GREEN
 
-def main():
-    ks = KeyboardSerial()
+STR_UPPER = "abcdefghijklmnopqrstuvwxyz`1234567890-=[]\;\',./"
+STR_LOWER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}|:\"<>?"
+Uppercase = str.maketrans(STR_UPPER, STR_LOWER)
+Lowercase = str.maketrans(STR_LOWER, STR_UPPER)
 
-    # ks.autoconnect()
-    # if ks.is_connected():
-        # print("Successfully connected")
+def main():
+
+    ks.autoconnect()
+    if ks.is_connected():
+        print("Successfully connected")
                     
     pygame.init()
     pygame.event.set_allowed(None)
@@ -48,13 +52,15 @@ def main():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 ks.clear_leds()
                 running = False
-            if event.type == RETURN:
+            if event.type == KEYDOWN and event.key == K_RETURN:
                 last = ' '
                 text = textinput.get_text()
                 for c in text:
                     light(last, KeyboardSerial.LED_OFF)
                     light(c, KeyboardSerial.LED_GREEN)
-                    time.sleep(0.1)
+                    last = c
+                    time.sleep(0.5)
+                ks.clear_leds()
 
 
         textinput.update(events)
@@ -81,7 +87,7 @@ def light(char, state):
         ks.update_leds({'SPACE_LEFT': state})
         ks.update_leds({'SPACE_RIGHT': state})
     else:
-        key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[char]]
+        key = KeyboardSerial.KEYS[KeyboardSerial.CHAR_MAP[char.translate(Lowercase)]]
         ks.update_leds({key: state})
 
 

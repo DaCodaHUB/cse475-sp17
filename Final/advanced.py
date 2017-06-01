@@ -290,10 +290,7 @@ def update_homerow(sensor_data):
                 release_max = MAX_RELEASE_OTHER_SIDE
         if KEY_CAP_TIMERS[key] > release_max:
             HOMEROW_INCORRECT = True
-        # TODO: FIX AFTER DANG FIXEES THE LEAD
-        if key == 'k':
-            KEY_CAP_TIMERS[key] = 0
-
+        
 
 def set_char_light(c, led_state):
     global SHIFT_LEFT, SHIFT_RIGHT

@@ -21,7 +21,7 @@ import sys
 import os
 import threading
 import time
-import beginner, intermediate, advanced, light_keys, capacitive
+import beginner_2, intermediate, advanced, light_keys, capacitive
 from pygame.locals import *
 from ser.keyboardserial import KeyboardSerial
 
@@ -50,8 +50,8 @@ SHIFTED = False
 FIRST = True
 TITLE = "KeyPal Demo"
 TITLES = ["Mother of all demos: Sensors", "Mother of all demos: Lights",
-            "KeyPal Client: Beginner", "KeyPal Client: Intermediate", "KeyPal Client: Advanced"]
-PROGRAMS = [capacitive, light_keys, beginner, intermediate, advanced]
+        "KeyPal Client: Beginner", "KeyPal Client: Intermediate", "KeyPal Client: Advanced"]
+PROGRAMS = [capacitive, light_keys, beginner_2, intermediate, advanced]
 
 SELECT = 0
 
