@@ -61,7 +61,7 @@ Lowercase = str.maketrans(STR_LOWER, STR_UPPER)
 
 # map from key character to sensor array index
 KEY_CAP_MAP = {'a': 5, 's': 1, 'd': 4, 'f': 3, 'j': 0, 'k': 2, 'l': 7, ';': 6}
-CAP_THRESHOLD = 11
+CAP_THRESHOLD = 15
 # Which keys should be pressed by which fingers
 KEYS_LEFT = "asdf"
 KEYS_RIGHT = "jkl;"
@@ -97,7 +97,7 @@ def main():
         print("Successfully connected")
     else:
         print("Could not connect")
-        terminate()
+        return
 
     # Pygame game initialization
     pygame.init()
@@ -187,7 +187,6 @@ def main():
         pygame.display.flip()
 
     # Cleanup on exit
-    connection.close()
     ks.disconnect()
 
 ## Game update

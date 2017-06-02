@@ -63,7 +63,7 @@ SENTENCE = ""
 SENT_INDEX = 0
 
 WORDS_PER_MIN = 0.0
-TITLE = "Intermediate Mode"
+TITLE = "Beginner Mode"
 
 
 def main():
@@ -75,7 +75,7 @@ def main():
         print("Successfully connected")
     else:
         print("Could not connect")
-        terminate()
+        return
 
     # Pygame game initialization
     pygame.init()
@@ -146,7 +146,6 @@ def main():
         pygame.display.flip()
 
     # Cleanup on exit
-    connection.close()
     ks.disconnect()
 
 ## Game update

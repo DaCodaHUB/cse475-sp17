@@ -67,7 +67,7 @@ def main():
         DISPLAYSURF.blit(textinput.get_surface(), (10, 10))
         pygame.display.flip()
             
-    # ks.disconnect()
+    ks.disconnect()
 
 
 def show_title_screen(text):

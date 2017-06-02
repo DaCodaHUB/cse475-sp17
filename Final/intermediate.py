@@ -67,7 +67,7 @@ TITLE = "Intermediate Mode"
 
 
 def main():
-    global DISPLAYSURF, LEVEL, CUR, SENTENCES, SENTENCE, SENT_INDEX, SMALLFONT, BIGFONT
+    global DISPLAYSURF, LEVEL, CUR, SENTENCES, SENTENCE, SENT_INDEX, SMALLFONT, BIGFONT, TIMER_THREAD
 
     # Connect to the keyboard
     ks.autoconnect()
@@ -146,7 +146,6 @@ def main():
         pygame.display.flip()
 
     # Cleanup on exit
-    connection.close()
     ks.disconnect()
 
 ## Game update

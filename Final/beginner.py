@@ -45,7 +45,7 @@ ks = KeyboardSerial()
     
 RUNNING = True
 def main():
-    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN, RUNNING
+    global DISPLAYSURF, BIGFONT, TITLEFONT, SMALLFONT, LEVEL, CUR, ERROR_SOUND, ERRORS, WORDS, WORDS_PER_MIN, RUNNING, TIMER_THREAD
 
     ks.autoconnect()
     if ks.is_connected():
@@ -56,6 +56,7 @@ def main():
 
     pygame.init()
     ERROR_SOUND = pygame.mixer.Sound(os.path.join("resources", "error.wav"))
+    
 
     pygame.event.set_allowed(None)
     pygame.event.set_allowed([KEYUP, QUIT])
@@ -75,6 +76,10 @@ def main():
     pygame.event.clear()
     pygame.event.wait()
     # update_timer(time.time())
+    TIMER_THREAD = threading.Timer(.1, update_timer, (start,))
+    TIMER_THREAD.daemon = True
+    TIMER_THREAD.start()
+
 
     while RUNNING:
         CUR = connection.cursor()
@@ -96,6 +101,7 @@ def main():
             #pygame.time.wait(1000)
     connection.close()
     ks.disconnect()
+    TIMER_THREAD.cancel()
 
 
 def make_text_objs(text, font, fontcolor):
@@ -215,11 +221,8 @@ def show_title_screen(text):
 
 # runs in separate thread and shows the time on the screen
 def update_timer(start):
-    global DISPLAYSURF, WORDS, WORDS_PER_MIN, TIMER_THREAD
-    TIMER_THREAD = threading.Timer(.1, update_timer, (start,))
-    TIMER_THREAD.daemon = True
-    TIMER_THREAD.start()
-    #print "TIME: {}".format(time.time() - start)
+    global DISPLAYSURF, WORDS, WORDS_PER_MIN
+        #print "TIME: {}".format(time.time() - start)
     difference = int(time.time() - start)
     time_surf, time_rect = make_text_objs('TimeXX: ' + str(difference), SMALLFONT, TEXTCOLOR)
     time_surf.fill(BGCOLOR)
